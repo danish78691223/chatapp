@@ -1,0 +1,112 @@
+/* Modal background */
+.video-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+/* Container for video + UI */
+.video-wrapper {
+  position: relative;
+  width: 90%;
+  max-width: 900px;
+}
+
+/* Actual <video> element */
+.video-player {
+  width: 100%;
+  max-height: 90vh;
+  border-radius: 12px;
+  background: black;
+  outline: none;
+  border: none;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Close button above video */
+.close-btn {
+  position: absolute;
+  right: 12px;
+  top: -42px;
+  font-size: 22px;
+  background: none;
+  border: none;
+  color: white;
+  padding: 6px;
+  cursor: pointer;
+  z-index: 6; /* above everything */
+}
+
+/* Comments button */
+.comment-btn {
+  position: absolute;
+  bottom: -48px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0095ff;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+  z-index: 6;
+}
+.comment-btn:hover { background: #0077cc; }
+
+/* Gesture feedback text */
+.gesture {
+  position: absolute;
+  font-size: 42px;
+  font-weight: 700;
+  color: white;
+  pointer-events: none;
+  animation: fadeOut 0.45s ease-out;
+  z-index: 5;
+}
+
+/* placement */
+.forward { right: 48px; top: 50%; transform: translateY(-50%); }
+.backward { left: 48px; top: 50%; transform: translateY(-50%); }
+.center { left: 50%; top: 50%; transform: translate(-50%, -50%); }
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: scale(1.18); }
+  to { opacity: 0; transform: scale(1); }
+}
+
+/* small responsive fix */
+@media (max-width: 420px) {
+  .comment-btn { bottom: -56px; padding: 8px 12px; font-size: 14px; }
+  .close-btn { top: -36px; font-size: 20px; }
+}
+
+
+.remote-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-gap: 8px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.remote-item {
+  position: relative;
+}
+
+.remote-label {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+}

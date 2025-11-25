@@ -1,0 +1,101 @@
+/* ===== Sidebar Base ===== */
+.sidebar {
+  width: 300px;
+  background: #ffffff;
+  border-right: 1px solid #e6ecf2;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  transition: 0.3s ease-in-out;
+  position: relative;
+}
+
+/* ===== Hamburger Button ===== */
+.mobile-menu-btn {
+  display: none;
+}
+
+/* ===== Close Button inside sidebar ===== */
+.sidebar-close-btn {
+  display: none;
+}
+
+/* ============================
+   MOBILE MODE
+=============================== */
+@media (max-width: 768px) {
+
+  /* Hamburger visible */
+  .mobile-menu-btn {
+    display: block;
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 2000;
+    font-size: 28px;
+    background: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.25);
+    cursor: pointer;
+  }
+
+  /* Sidebar slides in */
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 260px;
+    transform: translateX(-100%);
+    z-index: 1500;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.25);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Close button */
+  .sidebar-close-btn {
+    display: block;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 2001;
+  }
+}
+
+/* Ultra small phones */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 220px !important;
+  }
+}
+
+.upgrade-btn {
+  width: 100%;
+  padding: 10px 15px;
+  background: linear-gradient(180deg, #ffd37d, #ffb300);
+  border: none;
+  border-radius: 14px;
+  color: #503000;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(255, 179, 0, 0.4);
+  transition: 0.3s ease-in-out;
+}
+
+.upgrade-btn:hover {
+  background: linear-gradient(180deg, #ffe4a2, #ff9500);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(255, 149, 0, 0.55);
+}

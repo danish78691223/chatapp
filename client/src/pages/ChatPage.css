@@ -1,0 +1,484 @@
+/* ===== Chat Page Container ===== */
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #eef3f8;
+}
+
+/* ===== Top Group Bar ===== */
+.chat-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: #ffffff;
+  border-bottom: 1px solid #e6e6e6;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.chat-top-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.group-avatar {
+  width: 42px;
+  height: 42px;
+  background: #1877f2;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border-radius: 50%;
+  font-size: 18px;
+}
+
+.group-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #222;
+}
+
+.group-members {
+  font-size: 12px;
+  color: #666;
+}
+
+.chat-top-actions {
+  font-size: 22px;
+  cursor: pointer;
+  color: #444;
+}
+
+/* ===== Messages Area ===== */
+.messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Status text */
+.loading, 
+.no-msg {
+  text-align: center;
+  color: #999;
+  margin-top: 20px;
+  font-size: 15px;
+}
+
+/* ===== Message Bubbles (WhatsApp Style) ===== */
+/* ✅ Chat bubbles clean design */
+.my-message,
+.their-message {
+  max-width: 60%;
+  padding: 10px 14px;
+  margin: 6px 0;
+  border-radius: 18px;
+  font-size: 15px;
+  display: inline-block;
+  line-height: 1.4;
+}
+
+/* ✅ Your messages (Right) */
+.my-message {
+  background: #007a5a;
+  color: #fff;
+  margin-left: auto;
+  border-bottom-right-radius: 4px;
+}
+
+/* ✅ Other's messages (Left) */
+.their-message {
+  background: #ffffff;
+  color: #111;
+  border: 1px solid #dcdcdc;
+  border-bottom-left-radius: 4px;
+  margin-right: auto;
+}
+
+
+
+/* ===== Input / Send Section ===== */
+.send-box {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: #ffffff;
+  border-top: 1px solid #e3e3e3;
+  position: relative;
+}
+
+.send-box input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 25px;
+  border: 1px solid #d8d8d8;
+  outline: none;
+  font-size: 15px;
+  padding-left: 45px;
+}
+
+.send-box button {
+  margin-left: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 25px;
+  background: #1877f2;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.send-box button:hover {
+  background: #f8f8f8;
+}
+
+/* ===== Emoji Button ===== */
+.emoji-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.emoji-btn:hover {
+  opacity: 0.7;
+}
+
+
+/* ================================
+   WHATSAPP STYLE EMOJI PICKER
+================================= */
+
+/* Load Google’s Noto Color Emoji (fix blue Windows emojis) */
+@font-face {
+  font-family: "Noto Color Emoji";
+  src: url("https://fonts.gstatic.com/s/notocoloremoji/v18/Yq6R-LCAWCX3-6bM4fJRYH8wO7q7.woff2")
+    format("woff2");
+}
+
+.EmojiPickerReact,
+.EmojiPickerReact * {
+  font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji",
+    sans-serif !important;
+}
+
+/* Popup positioning */
+.emoji-popup {
+  position: absolute;
+  bottom: 75px;
+  left: 12px;
+  z-index: 9999;
+}
+
+/* Main container (WhatsApp bubble style) */
+.EmojiPickerReact {
+  width: 340px !important;
+  border-radius: 16px !important;
+  padding: 6px !important;
+  background: #ffffff !important;
+
+  border: none !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+  overflow: hidden !important;
+}
+
+/* Search Bar */
+.EmojiPickerReact .epr-search-container {
+  background: #f0f2f5 !important;
+  border-radius: 10px !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 6px !important;
+}
+
+.EmojiPickerReact .epr-search {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  font-size: 14px !important;
+}
+
+/* Category Navigation (top icons) */
+.EmojiPickerReact .epr-category-nav {
+  border-bottom: 1px solid #ececec !important;
+  padding-bottom: 4px !important;
+  margin-bottom: 6px !important;
+}
+
+.EmojiPickerReact .epr-category-nav button {
+  background: transparent !important;
+  opacity: 0.35 !important;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.EmojiPickerReact .epr-category-nav button:hover,
+.EmojiPickerReact .epr-category-nav button.active {
+  opacity: 1 !important;
+}
+
+/* Emoji grid */
+.EmojiPickerReact .epr-emoji {
+  border-radius: 8px !important;
+  padding: 6px !important;
+  transition: background 0.15s ease-in-out;
+}
+
+.EmojiPickerReact .epr-emoji:hover {
+  background: #eef1f3 !important;
+}
+
+/* Scrollbar look */
+.EmojiPickerReact ::-webkit-scrollbar {
+  width: 6px;
+}
+
+.EmojiPickerReact ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 20px;
+}
+
+.EmojiPickerReact ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+
+/* 📎 Upload Button Styling */
+.upload-btn {
+  font-size: 20px;
+  margin-right: 8px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+.upload-btn:hover {
+  opacity: 0.7;
+}
+
+/* Uploaded media */
+.chat-media {
+  max-width: 240px;
+  max-height: 240px;
+  border-radius: 10px;
+  margin-top: 4px;
+}
+
+/* Fix input & emoji alignment */
+.send-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.send-box input {
+  flex: 1;
+}
+
+/* =======================
+   SENDING ANIMATION
+==========================*/
+.sending-bubble {
+  background: #ccc;
+  opacity: 0.7;
+  position: relative;
+}
+
+.sending-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.upload-preview {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  opacity: 0.8;
+}
+
+/* Loader */
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #333;
+}
+
+.loader {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #1877f2;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+
+/* ===== GROUP CALL BANNER ===== */
+.group-call-banner {
+  background: #1e293b;
+  color: #fff;
+  padding: 12px 16px;
+  margin: 10px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: fadeSlide 0.25s ease;
+}
+
+.group-call-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.join-call-btn {
+  background: #22c55e;
+  padding: 8px 16px;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.dismiss-call-btn {
+  background: #475569;
+  padding: 8px 14px;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* 📞 Call button in top bar */
+.call-btn {
+  background: #2563eb;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.call-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Small slide-in animation */
+@keyframes fadeSlide {
+  0% { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+
+.members-btn {
+  margin-left: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.members-popup {
+  position: absolute;
+  right: 16px;
+  top: 64px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+  padding: 12px 16px;
+  width: 260px;
+  z-index: 20;
+}
+
+.members-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.group-call-btn {
+  background: #1da1f2;
+  border: none;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.group-call-btn:hover {
+  opacity: 0.9;
+}
+
+/* ============================
+   CHAT PAGE RESPONSIVE FIXES
+=============================== */
+
+@media (max-width: 768px) {
+
+  .chat-top-bar {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px;
+  }
+
+  .messages {
+    padding: 10px;
+  }
+
+  .my-message,
+  .their-message {
+    max-width: 85%;
+    font-size: 14px;
+  }
+
+  .chat-media {
+    max-width: 90%;
+    height: auto;
+  }
+
+  .send-box {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .send-box input {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .send-box button {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .emoji-popup {
+    left: 10px;
+    right: 10px;
+    bottom: 70px;
+    width: calc(100% - 20px) !important;
+  }
+}

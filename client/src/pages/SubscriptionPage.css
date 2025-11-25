@@ -1,0 +1,44 @@
+.subscription-container {
+  text-align: center;
+  padding: 40px;
+}
+
+.current-plan {
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.plans {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.plan-box {
+  width: 250px;
+  border-radius: 10px;
+  padding: 20px;
+  color: white;
+  text-align: center;
+  font-size: 17px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.plan-box:hover {
+  transform: scale(1.06);
+}
+
+.plan-box button {
+  background: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.free { background: #808080; }
+.bronze { background: #cd7f32; }
+.silver { background: #b9b9b9; }
+.gold { background: #ffd700; color: black; }
