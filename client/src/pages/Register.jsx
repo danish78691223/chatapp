@@ -1,8 +1,8 @@
 // src/pages/Register.jsx
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { API_BASE } from "../api/axios";
+import API, { API_BASE } from "../api/axios"; // ✅ API + API_BASE import
+// NOTE: agar tum API_BASE use nahi karna chaho to hata bhi sakte ho, sirf API kaafi hai
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -18,9 +18,9 @@ const Register = () => {
 
   const navigate = useNavigate();
 
-  // update field values
+  // input change handler
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   // STEP 1: Send OTP
@@ -28,32 +28,50 @@ const Register = () => {
     try {
       setLoading(true);
 
-      await axios.post(`${API_BASE}/api/auth/send-otp`, formData);
+      // ✅ IMPORTANT: yahan sirf API ka use hoga, URL me localhost nahi
+      const res = await API.post("/auth/send-otp", formData);
 
-      setShowOtpPopup(true);
-      alert("OTP sent to your email!");
-    } catch (err) {
-      alert(err.response?.data?.message || "Failed to send OTP");
+      console.log("Send OTP Response:", res.data);
+
+      // Agar backend se success aaye to popup dikhao
+      if (res.data?.success) {
+        setShowOtpPopup(true);
+        alert("OTP generated! (Email send attempt ki gayi, logs me OTP dekh sakte ho.)");
+      } else {
+        alert(res.data?.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.error("Send OTP Error:", error);
+      alert(error.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // STEP 2: Verify OTP and register
+  // STEP 2: Verify OTP + Register
   const verifyOtpAndRegister = async () => {
     try {
       setLoading(true);
 
-      await axios.post(`${API_BASE}/api/auth/verify-otp`, {
+      const res = await API.post("/auth/verify-otp", {
         ...formData,
         otp,
       });
 
-      alert("Registration successful!");
-      navigate("/login");
-    } catch (err) {
-      alert(err.response?.data?.message || "OTP verification failed");
+      console.log("Verify OTP Response:", res.data);
+
+      if (res.data?.success) {
+        alert("Registration successful!");
+        navigate("/login");
+      } else {
+        alert(res.data?.message || "OTP verification failed");
+      }
+    } catch (error) {
+      console.error("Verify OTP Error:", error);
+      alert(error.response?.data?.message || "OTP verification failed");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // form submit
@@ -108,7 +126,7 @@ const Register = () => {
         />
 
         <button type="submit" style={styles.button} disabled={loading}>
-          {loading ? "Please wait..." : "Register"}
+          {loading ? "Please wait..." : "Send OTP"}
         </button>
 
         <p style={{ textAlign: "center", marginTop: "10px" }}>
@@ -127,7 +145,7 @@ const Register = () => {
         <div style={styles.popupOverlay}>
           <div style={styles.popup}>
             <h3>Enter OTP</h3>
-            <p>We sent a 6-digit OTP to your email.</p>
+            <p>We generated a 6-digit OTP. (Email may fail on Render, but OTP server logs me hai.)</p>
 
             <input
               type="text"
@@ -142,6 +160,7 @@ const Register = () => {
               onClick={verifyOtpAndRegister}
               style={styles.verifyBtn}
               disabled={loading}
+              type="button"
             >
               {loading ? "Verifying..." : "Verify OTP"}
             </button>
@@ -149,6 +168,7 @@ const Register = () => {
             <button
               onClick={() => setShowOtpPopup(false)}
               style={styles.cancelBtn}
+              type="button"
             >
               Cancel
             </button>
