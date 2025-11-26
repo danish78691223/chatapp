@@ -25,22 +25,21 @@ const server = http.createServer(app);
 
 // =====================================
 // USER SOCKET STORE
-// userId -> socketId
 // =====================================
 const userSockets = {};
-
-// =====================================
-// GROUP CALL ROOM STORE
-// roomId -> Set<userId>
-// =====================================
 const callRooms = {};
 
 // =====================================
-// MIDDLEWARE
+// CORS MIDDLEWARE (UPDATED)
 // =====================================
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://chatapp-virid-three-86.vercel.app", // YOUR VERCEL DOMAIN
+];
+
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
@@ -48,11 +47,11 @@ app.use(
 app.use(express.json());
 
 // =====================================
-// STATIC FILES (UPLOADS / VIDEO)
+// STATIC FILES
 // =====================================
 app.use("/uploads", express.static("uploads"));
 
-// VIDEO CHUNK SUPPORT
+// VIDEO STREAMING
 app.get("/uploads/:filename", (req, res) => {
   const filePath = path.join("uploads", req.params.filename);
 
@@ -112,27 +111,26 @@ mongoose
   .catch((err) => console.log("❌ MongoDB Error:", err.message));
 
 // =====================================
-// SOCKET.IO SERVER
+// SOCKET.IO CONFIG (UPDATED)
 // =====================================
 const io = new Server(server, {
-  cors: { origin: "http://localhost:3000", methods: ["GET", "POST"] },
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+  },
 });
 
 io.on("connection", (socket) => {
-  console.log("🟢 Connected:", socket.id);
+  console.log("🟢 Socket Connected:", socket.id);
 
-  // -------------------------------
-  // USER REGISTRATION FOR CALLS
-  // -------------------------------
+  // Register user for signaling
   socket.on("register-user", (userId) => {
     userSockets[userId] = socket.id;
     socket.userId = userId;
     console.log(`Registered: ${userId} -> ${socket.id}`);
   });
 
-  // -------------------------------
-  // GROUP CHAT
-  // -------------------------------
+  // Group message events
   socket.on("join_group", (groupId) => socket.join(groupId));
   socket.on("leave_group", (groupId) => socket.leave(groupId));
 
@@ -140,9 +138,7 @@ io.on("connection", (socket) => {
     io.to(msg.groupId).emit("receive_group_message", msg);
   });
 
-  // -------------------------------
-  // GROUP CALL *UI BANNER ONLY*
-  // -------------------------------
+  // Group Call Alert
   socket.on("start-group-call", ({ groupId, callerId, callerName }) => {
     socket.to(groupId).emit("incoming-group-call", {
       groupId,
@@ -151,9 +147,7 @@ io.on("connection", (socket) => {
     });
   });
 
-  // ================================================================
-  //                    1-ON-1 WEBRTC SIGNALING
-  // ================================================================
+  // WebRTC (1-on-1 Signaling)
   socket.on("call-user", ({ toUserId, offer }) => {
     const target = userSockets[toUserId];
     if (target) {
@@ -178,107 +172,36 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("end-call", ({ toUserId }) => {
-    const target = userSockets[toUserId];
-    if (target) io.to(target).emit("call-ended");
-  });
-
-  // ================================================================
-  //                GROUP VIDEO CALL (PURE WEBRTC MESH)
-  // ================================================================
-
-  // 1. JOIN CALL ROOM
+  // WebRTC (Group Mesh Call)
   socket.on("join-call-room", ({ roomId, userId }) => {
-    console.log(`📞 User ${userId} joined call room ${roomId}`);
-
     if (!callRooms[roomId]) callRooms[roomId] = new Set();
 
     const existingUsers = Array.from(callRooms[roomId]);
     callRooms[roomId].add(userId);
-
     socket.join(roomId);
 
-    // Send existing users back to the new user
-    socket.emit("call-room-users", {
-      roomId,
-      users: existingUsers,
-    });
+    socket.emit("call-room-users", { roomId, users: existingUsers });
 
-    // Notify others
-    socket.to(roomId).emit("call-user-joined-room", {
-      roomId,
-      userId,
-    });
+    socket.to(roomId).emit("call-user-joined-room", { roomId, userId });
   });
 
-  // 2. LEAVE CALL ROOM
   socket.on("leave-call-room", ({ roomId, userId }) => {
-    console.log(`📞 User ${userId} left call room ${roomId}`);
-
     socket.leave(roomId);
 
     if (callRooms[roomId]) {
       callRooms[roomId].delete(userId);
 
-      if (callRooms[roomId].size === 0) {
-        delete callRooms[roomId];
-      }
+      if (callRooms[roomId].size === 0) delete callRooms[roomId];
     }
 
-    socket.to(roomId).emit("call-user-left-room", {
-      roomId,
-      userId,
-    });
+    socket.to(roomId).emit("call-user-left-room", { roomId, userId });
   });
 
-  // 3. OFFER
-  socket.on("group-call-offer", ({ roomId, toUserId, fromUserId, offer }) => {
-    const target = userSockets[toUserId];
-    if (target) {
-      io.to(target).emit("group-call-offer", {
-        roomId,
-        fromUserId,
-        offer,
-      });
-    }
-  });
-
-  // 4. ANSWER
-  socket.on("group-call-answer", ({ roomId, toUserId, fromUserId, answer }) => {
-    const target = userSockets[toUserId];
-    if (target) {
-      io.to(target).emit("group-call-answer", {
-        roomId,
-        fromUserId,
-        answer,
-      });
-    }
-  });
-
-  // 5. ICE CANDIDATES
-  socket.on(
-    "group-ice-candidate",
-    ({ roomId, toUserId, fromUserId, candidate }) => {
-      const target = userSockets[toUserId];
-      if (target) {
-        io.to(target).emit("group-ice-candidate", {
-          roomId,
-          fromUserId,
-          candidate,
-        });
-      }
-    }
-  );
-
-  // -------------------------------
-  // DISCONNECT CLEANUP
-  // -------------------------------
   socket.on("disconnect", () => {
     console.log("🔴 Disconnected:", socket.id);
 
     let disconnectedUser = null;
 
-    // remove from userSockets
     for (const uid in userSockets) {
       if (userSockets[uid] === socket.id) {
         disconnectedUser = uid;
@@ -287,7 +210,6 @@ io.on("connection", (socket) => {
       }
     }
 
-    // remove from call rooms
     if (disconnectedUser) {
       for (const roomId in callRooms) {
         if (callRooms[roomId].has(disconnectedUser)) {
@@ -298,9 +220,7 @@ io.on("connection", (socket) => {
             userId: disconnectedUser,
           });
 
-          if (callRooms[roomId].size === 0) {
-            delete callRooms[roomId];
-          }
+          if (callRooms[roomId].size === 0) delete callRooms[roomId];
         }
       }
     }
@@ -311,6 +231,4 @@ io.on("connection", (socket) => {
 // START SERVER
 // =====================================
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () =>
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-);
+server.listen(PORT, () => console.log(`🚀 Server running on PORT ${PORT}`));
