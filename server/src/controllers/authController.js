@@ -18,7 +18,7 @@ export const getUserLocation = async (req, res) => {
     const ip =
       req.headers["x-forwarded-for"]?.split(",")[0] ||
       req.socket.remoteAddress ||
-      "8.8.8.8"; // fallback IP
+      "8.8.8.8"; // fallback
 
     let state = "Unknown";
 
@@ -27,7 +27,6 @@ export const getUserLocation = async (req, res) => {
       state = loc.data?.region || "Unknown";
     } catch (err) {
       console.log("⚠️ IP API error in getUserLocation:", err.response?.status || err.message);
-      // don't throw, just fall back to "Unknown"
       state = "Unknown";
     }
 
@@ -37,6 +36,18 @@ export const getUserLocation = async (req, res) => {
     return res.json({ state: "Unknown" });
   }
 };
+
+// HELPER: create transporter (local dev ke liye useful)
+const createTransporter = () =>
+  nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
 
 // -------------------------
 // SEND OTP FOR REGISTRATION
@@ -61,27 +72,26 @@ export const sendOtp = async (req, res) => {
       expires: Date.now() + 5 * 60 * 1000,
     };
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    console.log(`📧 [REGISTER OTP] ${email} -> ${otp}`);
 
-    await transporter.sendMail({
-      from: `"Chat App" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Your OTP Code",
-      html: `<h2>Your OTP is: <strong>${otp}</strong></h2>`,
-    });
+    // Try sending email, but DON'T crash if it fails
+    try {
+      const transporter = createTransporter();
+      await transporter.sendMail({
+        from: `"Chat App" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "Your OTP Code",
+        html: `<h2>Your OTP is: <strong>${otp}</strong></h2>`,
+      });
+    } catch (mailErr) {
+      console.log("⚠️ Registration OTP email failed:", mailErr.code || mailErr.message);
+    }
 
-    res.json({ success: true, message: "OTP sent to Email" });
+    // Always respond success (OTP stored in memory)
+    res.json({ success: true, message: "OTP generated and (attempted) to send to Email" });
   } catch (error) {
     console.error("OTP Error:", error);
-    res.status(500).json({ message: "Failed to send OTP" });
+    res.status(500).json({ message: "Failed to generate OTP" });
   }
 };
 
@@ -126,7 +136,7 @@ export const verifyOtp = async (req, res) => {
 };
 
 // -------------------------
-// STEP 1 — LOGIN: SEND OTP ONLY (SAFE LOCATION)
+// STEP 1 — LOGIN: SEND OTP ONLY (SAFE)
 // -------------------------
 export const loginUser = async (req, res) => {
   try {
@@ -155,7 +165,6 @@ export const loginUser = async (req, res) => {
       isSouth = southStates.includes(userState);
     } catch (err) {
       console.log("⚠️ IP API error in loginUser:", err.response?.status || err.message);
-      // don't block login, just treat as non-south
       userState = "Unknown";
       isSouth = false;
     }
@@ -167,29 +176,27 @@ export const loginUser = async (req, res) => {
       expires: Date.now() + 5 * 60 * 1000,
     };
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    console.log(`📧 [LOGIN OTP] ${email} -> ${otp} (state: ${userState})`);
 
-    const subject = isSouth
-      ? "Southern India Login Verification"
-      : "Your Login OTP";
+    // Try sending email, but DON'T crash app if it fails
+    try {
+      const transporter = createTransporter();
+      const subject = isSouth
+        ? "Southern India Login Verification"
+        : "Your Login OTP";
 
-    await transporter.sendMail({
-      to: email,
-      subject,
-      html: `<h2>Your OTP:</h2><h3>${otp}</h3>`,
-    });
+      await transporter.sendMail({
+        to: email,
+        subject,
+        html: `<h2>Your OTP:</h2><h3>${otp}</h3>`,
+      });
+    } catch (mailErr) {
+      console.log("⚠️ Login OTP email failed:", mailErr.code || mailErr.message);
+    }
 
     res.json({
       otpSent: true,
-      message: "OTP sent to your email",
+      message: "OTP generated and (attempted) to send to your email",
     });
   } catch (error) {
     console.error("Login OTP Error:", error);
