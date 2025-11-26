@@ -1,43 +1,39 @@
-import React, { useEffect, useState } from "react";
-import API from "../api/axios";
-import { useNavigate } from "react-router-dom";
+// src/pages/Login.jsx
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate, Link } from "react-router-dom";
+import { API_BASE } from "../api/axios";
+import "./Login.css";
 
-const Groups = () => {
-  const [groups, setGroups] = useState([]);
+const Login = ({ setUser }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-  const user = storedUser?.user || storedUser;
-  const userId = user?._id;
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-  useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        const res = await API.get("/groups");
-        setGroups(res.data);
-      } catch (err) {
-        console.error("❌ Error:", err);
-      }
-    };
-    fetchGroups();
-  }, []);
-
-  const handleJoin = async (groupId) => {
     try {
-      const res = await API.post(`/groups/${groupId}/join`);
-      alert(res.data.message);
-      const updated = await API.get("/groups");
-      setGroups(updated.data);
+      const res = await axios.post(`${API_BASE}/api/auth/login`, {
+        email,
+        password,
+      });
+
+      if (res.data.otpSent) {
+        sessionStorage.setItem("loginEmail", email);
+        alert("OTP sent to your email!");
+        navigate("/login-otp");
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Login Error:", err);
+      alert(err.response?.data?.message || "Login failed");
     }
   };
-
-  const openGroup = (id) => navigate(`/chat/${id}`);
 
   return (
     <div className="login-page">
       <h2>Login</h2>
+
       <form onSubmit={handleLogin}>
         <input
           type="email"
@@ -45,7 +41,7 @@ const Groups = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-        /><br />
+        />
 
         <input
           type="password"
@@ -53,13 +49,13 @@ const Groups = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-        /><br />
+        />
 
         <button type="submit">Send OTP</button>
       </form>
 
       <p className="register-link">
-        Don't have an account? <Link to="/register">Register here</Link>
+        Don’t have an account? <Link to="/register">Register here</Link>
       </p>
     </div>
   );

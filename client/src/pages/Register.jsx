@@ -1,6 +1,8 @@
+// src/pages/Register.jsx
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../api/axios";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -16,52 +18,45 @@ const Register = () => {
 
   const navigate = useNavigate();
 
+  // update field values
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   // STEP 1: Send OTP
   const sendOtp = async () => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    await axios.post(`${API_BASE}/api/auth/send-otp`, {
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      password: formData.password,
-    });
+      await axios.post(`${API_BASE}/api/auth/send-otp`, formData);
 
-    setShowOtpPopup(true);
-    alert("OTP sent to your email!");
-  } catch (error) {
-    alert(error.response?.data?.message || "Failed to send OTP");
-  }
-  setLoading(false);
-};
+      setShowOtpPopup(true);
+      alert("OTP sent to your email!");
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to send OTP");
+    }
+    setLoading(false);
+  };
 
-
-  // STEP 2: Verify OTP + Register
+  // STEP 2: Verify OTP and register
   const verifyOtpAndRegister = async () => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    await axios.post(`${API_BASE}/api/auth/verify-otp`, {
-      ...formData,
-      otp,
-    });
+      await axios.post(`${API_BASE}/api/auth/verify-otp`, {
+        ...formData,
+        otp,
+      });
 
-    alert("Registration successful!");
-    navigate("/login");
+      alert("Registration successful!");
+      navigate("/login");
+    } catch (err) {
+      alert(err.response?.data?.message || "OTP verification failed");
+    }
+    setLoading(false);
+  };
 
-  } catch (error) {
-    alert(error.response?.data?.message || "OTP verification failed");
-  }
-
-  setLoading(false);
-};
-
-
+  // form submit
   const handleSubmit = (e) => {
     e.preventDefault();
     sendOtp();
@@ -204,8 +199,6 @@ const styles = {
     cursor: "pointer",
     fontSize: "1rem",
   },
-
-  // OTP Popup styles
   popupOverlay: {
     position: "fixed",
     inset: 0,

@@ -1,40 +1,20 @@
+// src/api/axios.js
 import axios from "axios";
 
+const API_BASE = process.env.REACT_APP_API_URL;
+
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL + "/api",
+  baseURL: `${API_BASE}/api`,
 });
 
-<<<<<<< HEAD
-// Automatically attach token
-=======
-// Add token
->>>>>>> 98d3a84b222c5bcf90b1b4346a506ace9413656a
+// attach token
 API.interceptors.request.use((config) => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const token = user?.token;
+  const stored = JSON.parse(localStorage.getItem("user"));
+  const token = stored?.token;
 
-  if (token) {
-    config.headers = config.headers || {};
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-<<<<<<< HEAD
-// Token expiration handler
-=======
-// 401 error handling
->>>>>>> 98d3a84b222c5bcf90b1b4346a506ace9413656a
-API.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
-      localStorage.removeItem("user");
-      window.location.href = "/login";
-    }
-    return Promise.reject(err);
-  }
-);
-
+export { API_BASE };
 export default API;
