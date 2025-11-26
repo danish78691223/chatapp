@@ -9,45 +9,31 @@ const Groups = () => {
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const user = storedUser?.user || storedUser;
   const userId = user?._id;
-  const token = storedUser?.token;
 
-  // ✅ Fetch groups
   useEffect(() => {
     const fetchGroups = async () => {
       try {
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await API.get("http://localhost:5000/api/groups", { headers });
+        const res = await API.get("/groups");
         setGroups(res.data);
-      } catch (error) {
-        console.error("❌ Error fetching groups:", error);
+      } catch (err) {
+        console.error("❌ Error:", err);
       }
     };
     fetchGroups();
-  }, [token]);
+  }, []);
 
-  // ✅ Join group
   const handleJoin = async (groupId) => {
     try {
-      const res = await API.post(
-        `http://localhost:5000/api/groups/${groupId}/join`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await API.post(`/groups/${groupId}/join`);
       alert(res.data.message);
-      const updated = await API.get("http://localhost:5000/api/groups", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const updated = await API.get("/groups");
       setGroups(updated.data);
     } catch (err) {
-      console.error("Join error:", err);
-      alert(err.response?.data?.message || "Failed to join");
+      console.error(err);
     }
   };
 
-  // ✅ Navigate to chat page
-  const handleOpenGroup = (groupId) => {
-    navigate(`/chat/${groupId}`);
-  };
+  const openGroup = (id) => navigate(`/chat/${id}`);
 
   return (
     <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>

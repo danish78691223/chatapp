@@ -1,35 +1,39 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
-import "./Login.css";
+import React, { useEffect, useState } from "react";
+import API from "../api/axios";
+import { useNavigate } from "react-router-dom";
 
-const Login = ({ setUser }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const Groups = () => {
+  const [groups, setGroups] = useState([]);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const user = storedUser?.user || storedUser;
+  const userId = user?._id;
 
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
-
-      if (res.data.otpSent) {
-        // Save email in session to verify OTP
-        sessionStorage.setItem("loginEmail", email);
-        alert("OTP sent to your email!");
-        navigate("/login-otp");
-      } else {
-        alert("Unexpected response.");
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const res = await API.get("/groups");
+        setGroups(res.data);
+      } catch (err) {
+        console.error("❌ Error:", err);
       }
-    } catch (error) {
-      console.error("Login Error:", error);
-      alert(error.response?.data?.message || "Login failed");
+    };
+    fetchGroups();
+  }, []);
+
+  const handleJoin = async (groupId) => {
+    try {
+      const res = await API.post(`/groups/${groupId}/join`);
+      alert(res.data.message);
+      const updated = await API.get("/groups");
+      setGroups(updated.data);
+    } catch (err) {
+      console.error(err);
     }
   };
+
+  const openGroup = (id) => navigate(`/chat/${id}`);
 
   return (
     <div className="login-page">

@@ -5,18 +5,16 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Home from "./pages/Home";
-//import Groups from "./pages/Groups";
-//import ChatPage from "./pages/ChatPage";
 import VideoPlayer from "./components/VideoPlayer";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import LoginOtp from "./pages/LoginOtp";
 
+const API_BASE = process.env.REACT_APP_API_URL;
 
 function App() {
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState("dark");
-
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
@@ -24,78 +22,73 @@ function App() {
   }, []);
 
   useEffect(() => {
-  const applyTheme = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/location");
-      const loc = await res.json();
+    const applyTheme = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/location`);
+        const loc = await res.json();
 
-      const state = loc.state;
-      const southStates = ["Tamil Nadu", "Kerala", "Karnataka", "Andhra Pradesh", "Telangana"];
-      const hour = new Date().getHours();
+        const state = loc.state;
+        const southStates = ["Tamil Nadu", "Kerala", "Karnataka", "Andhra Pradesh", "Telangana"];
+        const hour = new Date().getHours();
+        const isSouth = southStates.includes(state);
 
-      const isSouth = southStates.includes(state);
-
-      if (hour >= 10 && hour <= 12 && isSouth) {
-        setTheme("light");
-        document.body.className = "light-theme";
-      } else {
-        setTheme("dark");
+        if (hour >= 10 && hour <= 12 && isSouth) {
+          setTheme("light");
+          document.body.className = "light-theme";
+        } else {
+          setTheme("dark");
+          document.body.className = "dark-theme";
+        }
+      } catch (err) {
+        console.log("Theme Location Error:", err.message);
         document.body.className = "dark-theme";
       }
-    } catch (err) {
-      console.log("Theme Location Error:", err.message);
-      document.body.className = "dark-theme";
-    }
-  };
+    };
 
-  applyTheme();
-}, []);
-
-
+    applyTheme();
+  }, []);
 
   return (
     <Router>
-  <Routes>
-    <Route path="/" element={<Navigate to={user ? "/home" : "/login"} />} />
+      <Routes>
+        <Route path="/" element={<Navigate to={user ? "/home" : "/login"} />} />
 
-    <Route
-      path="/login"
-      element={!user ? <Login setUser={setUser} /> : <Navigate to="/home" replace />}
-    />
+        <Route
+          path="/login"
+          element={!user ? <Login setUser={setUser} /> : <Navigate to="/home" replace />}
+        />
 
-    <Route
-      path="/register"
-      element={!user ? <Register /> : <Navigate to="/home" replace />}
-    />
+        <Route
+          path="/register"
+          element={!user ? <Register /> : <Navigate to="/home" replace />}
+        />
 
-    <Route
-      path="/home"
-      element={user ? <Home user={user} setUser={setUser} /> : <Navigate to="/login" />}
-    />
+        <Route
+          path="/home"
+          element={user ? <Home user={user} setUser={setUser} /> : <Navigate to="/login" />}
+        />
 
-    {/* ✅ PROFILE PAGE FIXED ROUTE */}
-    <Route
-      path="/profile"
-      element={user ? <Profile user={user} /> : <Navigate to="/login" />}
-    />
+        <Route
+          path="/profile"
+          element={user ? <Profile user={user} /> : <Navigate to="/login" />}
+        />
 
-    {/* ✅ CHAT ROUTE MUST LOAD Home (layout) */}
-    <Route
-      path="/chat/:groupId"
-      element={user ? <Home user={user} setUser={setUser} /> : <Navigate to="/login" />}
-    />
-    <Route path="/subscription" element={<SubscriptionPage />} />
-    <Route path="/success" element={<SubscriptionSuccess />} />
-    <Route
-      path="/player"
-      element={user ? <VideoPlayer /> : <Navigate to="/login" />}
-    />
-    <Route path="/login-otp" element={<LoginOtp setUser={setUser} />} />
+        <Route
+          path="/chat/:groupId"
+          element={user ? <Home user={user} setUser={setUser} /> : <Navigate to="/login" />}
+        />
 
+        <Route path="/subscription" element={<SubscriptionPage />} />
+        <Route path="/success" element={<SubscriptionSuccess />} />
 
-  </Routes>
-</Router>
+        <Route
+          path="/player"
+          element={user ? <VideoPlayer /> : <Navigate to="/login" />}
+        />
 
+        <Route path="/login-otp" element={<LoginOtp setUser={setUser} />} />
+      </Routes>
+    </Router>
   );
 }
 

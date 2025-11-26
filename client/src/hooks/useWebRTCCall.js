@@ -24,7 +24,8 @@ export const useWebRTCCall = (currentUserId, remoteUserId) => {
   useEffect(() => {
     if (!currentUserId) return;
 
-    const socket = io("http://localhost:5000"); // your backend
+    const socket = io(process.env.REACT_APP_API_URL); 
+   // your backend
     socketRef.current = socket;
 
     // register user on socket server

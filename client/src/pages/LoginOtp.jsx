@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./LoginOtp.css";
 
+const API_BASE = process.env.REACT_APP_API_URL;
+
 const LoginOtp = ({ setUser }) => {
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
@@ -15,7 +17,7 @@ const LoginOtp = ({ setUser }) => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login-verify", {
+      const res = await axios.post(`${API_BASE}/api/auth/login-verify`, {
         email,
         otp,
       });
