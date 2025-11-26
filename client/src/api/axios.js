@@ -4,7 +4,7 @@ const API = axios.create({
   baseURL: process.env.REACT_APP_API_URL + "/api",
 });
 
-// Automatically attach token
+// Add token
 API.interceptors.request.use((config) => {
   const user = JSON.parse(localStorage.getItem("user"));
   const token = user?.token;
@@ -13,10 +13,11 @@ API.interceptors.request.use((config) => {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
-// Token expiration handler
+// 401 error handling
 API.interceptors.response.use(
   (res) => res,
   (err) => {
