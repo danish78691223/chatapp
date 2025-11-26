@@ -11,19 +11,30 @@ const southStates = ["Tamil Nadu", "Kerala", "Karnataka", "Andhra Pradesh", "Tel
 const otpStore = {};
 
 // -------------------------
-// GET USER LOCATION
+// GET USER LOCATION (SAFE)
 // -------------------------
 export const getUserLocation = async (req, res) => {
   try {
     const ip =
       req.headers["x-forwarded-for"]?.split(",")[0] ||
-      req.socket.remoteAddress;
+      req.socket.remoteAddress ||
+      "8.8.8.8"; // fallback IP
 
-    const loc = await axios.get(`https://ipapi.co/${ip}/json/`);
-    res.json({ state: loc.data.region });
+    let state = "Unknown";
+
+    try {
+      const loc = await axios.get(`https://ipapi.co/${ip}/json/`);
+      state = loc.data?.region || "Unknown";
+    } catch (err) {
+      console.log("⚠️ IP API error in getUserLocation:", err.response?.status || err.message);
+      // don't throw, just fall back to "Unknown"
+      state = "Unknown";
+    }
+
+    return res.json({ state });
   } catch (err) {
-    console.log("Location error:", err.message);
-    res.json({ state: "Unknown" });
+    console.log("Location fatal error:", err.message);
+    return res.json({ state: "Unknown" });
   }
 };
 
@@ -115,7 +126,7 @@ export const verifyOtp = async (req, res) => {
 };
 
 // -------------------------
-// STEP 1 — LOGIN: SEND OTP ONLY
+// STEP 1 — LOGIN: SEND OTP ONLY (SAFE LOCATION)
 // -------------------------
 export const loginUser = async (req, res) => {
   try {
@@ -129,14 +140,25 @@ export const loginUser = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    // Detect location
+    // Detect location safely
     const ip =
       req.headers["x-forwarded-for"]?.split(",")[0] ||
-      req.socket.remoteAddress;
+      req.socket.remoteAddress ||
+      "8.8.8.8";
 
-    const loc = await axios.get(`https://ipapi.co/${ip}/json/`);
-    const userState = loc.data.region || "Unknown";
-    const isSouth = southStates.includes(userState);
+    let userState = "Unknown";
+    let isSouth = false;
+
+    try {
+      const loc = await axios.get(`https://ipapi.co/${ip}/json/`);
+      userState = loc.data?.region || "Unknown";
+      isSouth = southStates.includes(userState);
+    } catch (err) {
+      console.log("⚠️ IP API error in loginUser:", err.response?.status || err.message);
+      // don't block login, just treat as non-south
+      userState = "Unknown";
+      isSouth = false;
+    }
 
     const otp = Math.floor(100000 + Math.random() * 900000);
 
@@ -155,19 +177,15 @@ export const loginUser = async (req, res) => {
       },
     });
 
-    if (isSouth) {
-      await transporter.sendMail({
-        to: email,
-        subject: "Southern India Login Verification",
-        html: `<h2>Your Verification OTP:</h2><h3>${otp}</h3>`,
-      });
-    } else {
-      await transporter.sendMail({
-        to: email,
-        subject: "Your Login OTP",
-        html: `<h2>Your OTP:</h2><h3>${otp}</h3>`,
-      });
-    }
+    const subject = isSouth
+      ? "Southern India Login Verification"
+      : "Your Login OTP";
+
+    await transporter.sendMail({
+      to: email,
+      subject,
+      html: `<h2>Your OTP:</h2><h3>${otp}</h3>`,
+    });
 
     res.json({
       otpSent: true,
