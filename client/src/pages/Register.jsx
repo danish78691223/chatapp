@@ -1,8 +1,7 @@
 // src/pages/Register.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API, { API_BASE } from "../api/axios"; // ✅ API + API_BASE import
-// NOTE: agar tum API_BASE use nahi karna chaho to hata bhi sakte ho, sirf API kaafi hai
+import API from "../api/axios"; // API instance
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -28,15 +27,13 @@ const Register = () => {
     try {
       setLoading(true);
 
-      // ✅ IMPORTANT: yahan sirf API ka use hoga, URL me localhost nahi
       const res = await API.post("/auth/send-otp", formData);
 
       console.log("Send OTP Response:", res.data);
 
-      // Agar backend se success aaye to popup dikhao
       if (res.data?.success) {
         setShowOtpPopup(true);
-        alert("OTP generated! (Email send attempt ki gayi, logs me OTP dekh sakte ho.)");
+        alert("OTP generated! Check your email (sent via Resend).");
       } else {
         alert(res.data?.message || "Failed to send OTP");
       }
@@ -54,7 +51,7 @@ const Register = () => {
       setLoading(true);
 
       const res = await API.post("/auth/verify-otp", {
-        ...formData,
+        email: formData.email,
         otp,
       });
 
@@ -145,7 +142,7 @@ const Register = () => {
         <div style={styles.popupOverlay}>
           <div style={styles.popup}>
             <h3>Enter OTP</h3>
-            <p>We generated a 6-digit OTP. (Email may fail on Render, but OTP server logs me hai.)</p>
+            <p>We sent a 6-digit OTP to your email.</p>
 
             <input
               type="text"

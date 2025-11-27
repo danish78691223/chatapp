@@ -1,9 +1,9 @@
+// src/pages/LoginOtp.jsx
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../api/axios";
 import "./LoginOtp.css";
-
-const API_BASE = process.env.REACT_APP_API_URL;
 
 const LoginOtp = ({ setUser }) => {
   const [otp, setOtp] = useState("");
@@ -27,6 +27,8 @@ const LoginOtp = ({ setUser }) => {
         setUser(res.data);
         alert("Login successful!");
         navigate("/home");
+      } else {
+        alert(res.data?.message || "OTP verification failed");
       }
     } catch (error) {
       console.error("OTP Verify Error:", error);
@@ -55,7 +57,9 @@ const LoginOtp = ({ setUser }) => {
           </button>
         </form>
 
-        <p className="email-info">OTP sent to <strong>{email}</strong></p>
+        <p className="email-info">
+          OTP sent to <strong>{email}</strong>
+        </p>
       </div>
     </div>
   );

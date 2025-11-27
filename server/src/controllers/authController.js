@@ -2,12 +2,18 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
-import nodemailer from "nodemailer";
 import axios from "axios";
+import { Resend } from "resend";
 
 const southStates = ["Tamil Nadu", "Kerala", "Karnataka", "Andhra Pradesh", "Telangana"];
 
-// Temporary OTP store
+// ==============================
+// RESEND SETUP
+// ==============================
+const resend = new Resend(process.env.RESEND_API_KEY);
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "Chat App <onboarding@resend.dev>";
+
+// Temporary OTP store (in-memory)
 const otpStore = {};
 
 // -------------------------
@@ -37,18 +43,6 @@ export const getUserLocation = async (req, res) => {
   }
 };
 
-// HELPER: create transporter (local dev ke liye useful)
-const createTransporter = () =>
-  nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
-
 // -------------------------
 // SEND OTP FOR REGISTRATION
 // -------------------------
@@ -69,26 +63,26 @@ export const sendOtp = async (req, res) => {
     otpStore[email] = {
       otp,
       data: { name, email, phone, password },
-      expires: Date.now() + 5 * 60 * 1000,
+      expires: Date.now() + 5 * 60 * 1000, // 5 mins
     };
 
     console.log(`📧 [REGISTER OTP] ${email} -> ${otp}`);
 
-    // Try sending email, but DON'T crash if it fails
+    // Send OTP via Resend
     try {
-      const transporter = createTransporter();
-      await transporter.sendMail({
-        from: `"Chat App" <${process.env.EMAIL_USER}>`,
+      await resend.emails.send({
+        from: FROM_EMAIL,
         to: email,
-        subject: "Your OTP Code",
-        html: `<h2>Your OTP is: <strong>${otp}</strong></h2>`,
+        subject: "Your Registration OTP",
+        html: `<h2>Your OTP is: <strong>${otp}</strong></h2>
+               <p>This code will expire in 5 minutes.</p>`,
       });
     } catch (mailErr) {
-      console.log("⚠️ Registration OTP email failed:", mailErr.code || mailErr.message);
+      console.log("⚠️ Registration OTP email failed:", mailErr?.message || mailErr);
     }
 
     // Always respond success (OTP stored in memory)
-    res.json({ success: true, message: "OTP generated and (attempted) to send to Email" });
+    res.json({ success: true, message: "OTP generated and email send attempted via Resend" });
   } catch (error) {
     console.error("OTP Error:", error);
     res.status(500).json({ message: "Failed to generate OTP" });
@@ -136,7 +130,7 @@ export const verifyOtp = async (req, res) => {
 };
 
 // -------------------------
-// STEP 1 — LOGIN: SEND OTP ONLY (SAFE)
+// STEP 1 — LOGIN: SEND OTP
 // -------------------------
 export const loginUser = async (req, res) => {
   try {
@@ -178,25 +172,26 @@ export const loginUser = async (req, res) => {
 
     console.log(`📧 [LOGIN OTP] ${email} -> ${otp} (state: ${userState})`);
 
-    // Try sending email, but DON'T crash app if it fails
+    // Send login OTP via Resend
     try {
-      const transporter = createTransporter();
       const subject = isSouth
         ? "Southern India Login Verification"
         : "Your Login OTP";
 
-      await transporter.sendMail({
+      await resend.emails.send({
+        from: FROM_EMAIL,
         to: email,
         subject,
-        html: `<h2>Your OTP:</h2><h3>${otp}</h3>`,
+        html: `<h2>Your Login OTP:</h2><h3>${otp}</h3>
+               <p>This code will expire in 5 minutes.</p>`,
       });
     } catch (mailErr) {
-      console.log("⚠️ Login OTP email failed:", mailErr.code || mailErr.message);
+      console.log("⚠️ Login OTP email failed:", mailErr?.message || mailErr);
     }
 
     res.json({
       otpSent: true,
-      message: "OTP generated and (attempted) to send to your email",
+      message: "OTP generated and email send attempted via Resend",
     });
   } catch (error) {
     console.error("Login OTP Error:", error);

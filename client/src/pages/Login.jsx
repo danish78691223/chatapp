@@ -23,6 +23,8 @@ const Login = ({ setUser }) => {
         sessionStorage.setItem("loginEmail", email);
         alert("OTP sent to your email!");
         navigate("/login-otp");
+      } else {
+        alert(res.data?.message || "Failed to send OTP");
       }
     } catch (err) {
       console.error("Login Error:", err);
