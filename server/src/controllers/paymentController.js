@@ -71,3 +71,25 @@ export const verifyPayment = async (req, res) => {
     res.status(500).json({ message: "Payment verification failed" });
   }
 };
+
+
+// =============================
+// GET USER PLAN
+// =============================
+export const getUserPlan = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+
+    if (!user)
+      return res.status(404).json({ message: "User not found" });
+
+    return res.json({
+      plan: user.subscription.plan,
+      minutesWatchedToday: user.subscription.minutesWatchedToday,
+      limit: user.subscription.watchLimitMinutes,
+    });
+  } catch (error) {
+    console.error("getUserPlan error:", error);
+    return res.status(500).json({ error: error.message || error });
+  }
+};
