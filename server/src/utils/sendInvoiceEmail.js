@@ -1,50 +1,35 @@
-import nodemailer from "nodemailer";
 import fs from "fs";
+import brevo from "./brevoClient.js";
 
-const sendInvoiceEmail = async (email, plan, amount, invoicePath) => {
+const sendInvoiceEmail = async (email, plan, amount, filePath) => {
   try {
-    // Check if invoice exists
-    if (!fs.existsSync(invoicePath)) {
-      console.log("❌ Invoice file not found:", invoicePath);
+    if (!fs.existsSync(filePath)) {
+      console.log("❌ Invoice not found:", filePath);
       return;
     }
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // must be 16 chars, no spaces
-      },
-    });
+    const pdfBase64 = fs.readFileSync(filePath, { encoding: "base64" });
 
-    await transporter.sendMail({
-      from: `"Chat App" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: `Invoice - ${plan.toUpperCase()} Plan`,
-      html: `
-        <h2>Payment Successful 🎉</h2>
-        <p>Your subscription has been upgraded.</p>
-        <ul>
-          <li>Plan: <strong>${plan.toUpperCase()}</strong></li>
-          <li>Amount Paid: <strong>₹${amount}</strong></li>
-        </ul>
-        <p>Your invoice is attached below.</p>
+    await brevo.sendTransacEmail({
+      sender: { email: process.env.BREVO_SENDER },
+      to: [{ email }],
+      subject: `Invoice for ${plan.toUpperCase()} Plan`,
+      htmlContent: `
+        <h2>Your Payment Invoice</h2>
+        <p>Plan: <b>${plan.toUpperCase()}</b></p>
+        <p>Amount Paid: <b>₹${amount}</b></p>
       `,
-      attachments: [
+      attachment: [
         {
-          filename: "Invoice.pdf",
-          path: invoicePath,
-          contentType: "application/pdf",
-        },
-      ],
+          name: "invoice.pdf",
+          content: pdfBase64
+        }
+      ]
     });
 
-    console.log("✅ Invoice email sent successfully");
-
+    console.log("📧 Invoice Sent →", email);
   } catch (err) {
-    console.error("❌ Email sending failed:", err);
+    console.log("❌ Invoice Email Error:", err.message);
   }
 };
 
