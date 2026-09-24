@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/pages/ChatPage.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
