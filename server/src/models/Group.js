@@ -21,8 +21,13 @@ const groupSchema = new mongoose.Schema(
     ],
     lastMessage: {
       type: String,
-      default: "",
+      default: "🔐 Encrypted message",
       trim: true,
+    },
+    unreadCounts: {
+      type: Map,
+      of: Number,
+      default: {},
     },
   },
   { timestamps: true }
