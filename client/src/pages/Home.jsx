@@ -3,6 +3,7 @@ import API from "../api/axios";
 import Sidebar from "../components/Sidebar";
 import ChatPage from "./ChatPage";
 import "./Home.css";
+import socket from "../socket";
 
 const Home = ({ user, setUser }) => {
   const stored = JSON.parse(localStorage.getItem("user"));
@@ -14,6 +15,31 @@ const Home = ({ user, setUser }) => {
   const [newGroupName, setNewGroupName] = useState("");
 
   const currentUserId = user?.user?._id || user?._id;
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  // 🔔 Global realtime notifications + unread synchronization
+  useEffect(() => {
+    if (!currentUserId) return;
+    socket.emit("register-user", currentUserId);
+    const onMessage = (msg) => {
+      if (!msg?.groupId || String(msg.sender) === String(currentUserId)) return;
+      const isOpen = String(selectedGroup?._id) === String(msg.groupId);
+      setGroups((prev) => prev.map((g) => String(g._id) === String(msg.groupId)
+        ? { ...g, lastMessage: "🔐 Encrypted message", unreadCounts: { ...(g.unreadCounts || {}), [currentUserId]: isOpen ? 0 : Number(g.unreadCounts?.[currentUserId] || 0) + 1 } }
+        : g));
+      if (!isOpen && notificationsEnabled && "Notification" in window && Notification.permission === "granted") {
+        new Notification("WebXWhale Chat", { body: "You received a new encrypted message." });
+      }
+    };
+    socket.on("receive_group_message", onMessage);
+    return () => socket.off("receive_group_message", onMessage);
+  }, [currentUserId, selectedGroup?._id, notificationsEnabled]);
+
+  const enableNotifications = async () => {
+    if (!("Notification" in window)) return;
+    const permission = await Notification.requestPermission();
+    setNotificationsEnabled(permission === "granted");
+  };
 
   // ✅ Fetch Groups
   useEffect(() => {
@@ -81,6 +107,7 @@ const Home = ({ user, setUser }) => {
 
       {/* Chat Area */}
       <div className="chat-area">
+        {!notificationsEnabled && "Notification" in window && Notification.permission !== "denied" && <button className="notification-optin" onClick={enableNotifications}>🔔 Enable notifications</button>
         {selectedGroup ? (
           (isMember || isCreator) ? (
             <ChatPage selectedGroup={selectedGroup} />
