@@ -12,7 +12,7 @@ import {
 const router = express.Router();
 
 // 🧾 GET ALL GROUPS
-router.get("/", getAllGroups);
+router.get("/", protect, getAllGroups);
 
 // 🆕 CREATE NEW GROUP
 router.post("/", protect, createGroup);
