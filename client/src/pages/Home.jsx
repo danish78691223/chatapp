@@ -145,7 +145,7 @@ const Home = ({ user, setUser }) => {
         ) : (
           <div className="welcome-placeholder">
             <div className="welcome-orb"><span>W</span></div>
-            <p className="welcome-eyebrow">WEBXWHALE CHAT</p>
+            <p className="welcome-eyebrow">WEBCHAT</p>
             <h2>Private conversations.<br />Built for connection.</h2>
             <p>Select a conversation from the left to get started.</p>
             <div className="welcome-badges">
