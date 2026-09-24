@@ -1,3 +1,5 @@
+import { registerE2EEPublicKey } from "./userService";
+
 import {
   generateIdentityKeyPair,
   exportPublicKey,
@@ -35,6 +37,15 @@ export const ensureIdentity = async () => {
     localStorage.setItem(PRIVATE_KEY, JSON.stringify(privateJwk));
     localStorage.setItem(PUBLIC_KEY, JSON.stringify(publicJwk));
     privateKey = pair.privateKey;
+  }
+
+  if (publicJwk && !localStorage.getItem("webxwhale.e2ee.registered.v1")) {
+    try {
+      await registerE2EEPublicKey(publicJwk, 1);
+      localStorage.setItem("webxwhale.e2ee.registered.v1", "1");
+    } catch (error) {
+      console.warn("E2EE public-key registration pending:", error?.message || error);
+    }
   }
 
   return { privateKey, publicJwk };
