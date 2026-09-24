@@ -140,26 +140,52 @@ const ChatPage = ({ selectedGroup }) => {
 
     const load = async () => {
       setLoading(true);
+
       try {
+        // Fetch the message list independently from E2EE initialization.
+        // E2EE key registration must never block the chat screen forever.
         const res = await API.get(`/messages/group/${groupId}`);
         const items = Array.isArray(res.data) ? res.data : [];
 
-        // A brand-new/empty group should render immediately. E2EE identity
-        // setup must not block the initial message screen.
-        if (!items.length) {
-          if (active) setMessages([]);
-          return;
+        if (!active) return;
+
+        // Render the conversation immediately.
+        setMessages(items);
+        setLoading(false);
+
+        // Decrypt asynchronously after the UI is available.
+        if (items.length) {
+          try {
+            await Promise.race([
+              (async () => {
+                await ensureIdentity();
+                const decrypted = await decryptGroupMessages(items);
+                if (active) setMessages(decrypted);
+              })(),
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("E2EE initialization timed out")), 8000)
+              ),
+            ]);
+          } catch (e2eeError) {
+            console.warn("E2EE initialization/decryption deferred:", e2eeError?.message || e2eeError);
+            if (active) {
+              setMessages(
+                items.map((msg) => ({
+                  ...msg,
+                  text: msg.encryptedPayloads?.length
+                    ? "🔒 Encrypted message"
+                    : (msg.text || ""),
+                }))
+              );
+            }
+          }
         }
-
-        await ensureIdentity();
-        const decrypted = await decryptGroupMessages(items);
-
-        if (active) setMessages(decrypted);
       } catch (err) {
         console.error("Fetch msg error:", err?.response?.data || err?.message || err);
-        if (active) setMessages([]);
-      } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setMessages([]);
+          setLoading(false);
+        }
       }
     };
 
