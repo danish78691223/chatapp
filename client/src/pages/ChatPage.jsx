@@ -15,7 +15,12 @@ import DirectCallModal from "../components/DirectCallModal";
 
 const ChatPage = ({ selectedGroup }) => {
   const params = useParams();
-  const groupId = params.groupId || window.currentGroupId;
+  const routeGroupId = params.groupId;
+  const groupId =
+    routeGroupId ||
+    selectedGroup?._id ||
+    window.location.pathname.split("/chat/")[1] ||
+    null;
 
   const stored = JSON.parse(localStorage.getItem("user"));
   const userId = stored?.user?._id || stored?._id;
