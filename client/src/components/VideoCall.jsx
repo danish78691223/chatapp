@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/components/VideoCall.jsx
 import React, { useEffect, useRef, useState } from "react";
 import socket from "../socket";
