@@ -56,6 +56,19 @@ export const markMessageRead = async (req, res) => {
   }
 };
 
+export const markGroupRead = async (req, res) => {
+  try {
+    const result = await Message.updateMany(
+      { groupId: req.params.groupId, sender: { $ne: req.userId }, readBy: { $ne: req.userId } },
+      { $addToSet: { readBy: req.userId } }
+    );
+    await Group.updateOne({ _id: req.params.groupId }, { $set: { ['unreadCounts.' + req.userId]: 0 } });
+    res.json({ updated: result.modifiedCount });
+  } catch (error) {
+    res.status(500).json({ message: "Unable to mark group as read" });
+  }
+};
+
 export const reactToMessage = async (req, res) => {
   try {
     const { emoji } = req.body;
