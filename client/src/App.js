@@ -8,9 +8,11 @@ import VideoPlayer from "./components/VideoPlayer";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import LoginOtp from "./pages/LoginOtp";
+import LoadingScreen from "./components/LoadingScreen";
 
 function App() {
   const [user, setUser] = useState(null);
+  const [booting, setBooting] = useState(true);
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
