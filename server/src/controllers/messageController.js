@@ -41,6 +41,40 @@ export const getMessages = async (req, res) => {
   }
 };
 
+export const markMessageRead = async (req, res) => {
+  try {
+    const message = await Message.findByIdAndUpdate(
+      req.params.messageId,
+      { $addToSet: { readBy: req.userId } },
+      { new: true }
+    );
+    if (!message) return res.status(404).json({ message: "Message not found" });
+    res.json({ message });
+  } catch (error) {
+    res.status(500).json({ message: "Unable to mark message as read" });
+  }
+};
+
+export const reactToMessage = async (req, res) => {
+  try {
+    const { emoji } = req.body;
+    if (!emoji) return res.status(400).json({ message: "Emoji is required" });
+
+    const message = await Message.findById(req.params.messageId);
+    if (!message) return res.status(404).json({ message: "Message not found" });
+
+    message.reactions = message.reactions.filter(
+      (reaction) => String(reaction.user) !== String(req.userId)
+    );
+    message.reactions.push({ user: req.userId, emoji });
+    await message.save();
+
+    res.json({ message });
+  } catch (error) {
+    res.status(500).json({ message: "Unable to react to message" });
+  }
+};
+
 /* Get group messages */
 export const getGroupMessages = async (req, res) => {
   try {
