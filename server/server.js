@@ -9,7 +9,6 @@ import http from "http";
 import path from "path";
 import fs from "fs";
 import { Server } from "socket.io";
-import dns from "dns";
 
 // ROUTES
 import authRoutes from "./src/routes/authRoutes.js";
@@ -24,7 +23,6 @@ import downloadRoutes from "./src/routes/downloadRoutes.js";
 
 dotenv.config();
 
-dns.setServer(["1.1.1.1", "8.8.8.8"]);
 
 const app = express();
 const server = http.createServer(app);
