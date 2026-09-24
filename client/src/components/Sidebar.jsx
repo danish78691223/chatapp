@@ -24,7 +24,7 @@ const Sidebar = ({ groups = [], selectedGroup, setSelectedGroup, onLogout, onSho
       <aside className={"sidebar " + (isOpen ? "open" : "")}>
         <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>×</button>
         <div className="sidebar-brand">
-          <div className="sidebar-brand-mark">W</div>
+          <div className="sidebar-brand-mark"><img src="/webchat-logo.svg" alt="WEBCHAT" /></div>
           <div className="sidebar-brand-copy"><strong>WEBCHAT</strong><span>by WebXWhale</span></div>
           <span className="brand-status" />
         </div>
