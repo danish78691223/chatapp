@@ -143,14 +143,26 @@ io.on("connection", (socket) => {
     userSockets[userId] = socket.id;
     socket.userId = userId;
     console.log(`Registered: ${userId} → ${socket.id}`);
+    socket.broadcast.emit("presence_update", { userId, online: true });
   });
 
-  // GROUP CHAT
+  // PRESENCE + GROUP CHAT
   socket.on("join_group", (groupId) => socket.join(groupId));
+  socket.on("typing", ({ groupId, userId, isTyping }) => {
+    socket.to(groupId).emit("user_typing", { userId, isTyping });
+  });
   socket.on("leave_group", (groupId) => socket.leave(groupId));
 
   socket.on("send_group_message", (msg) => {
     io.to(msg.groupId).emit("receive_group_message", msg);
+  });
+
+  socket.on("message_read", ({ groupId, messageId, userId }) => {
+    socket.to(groupId).emit("message_read", { messageId, userId });
+  });
+
+  socket.on("message_reaction", ({ groupId, messageId, userId, emoji }) => {
+    socket.to(groupId).emit("message_reaction", { messageId, userId, emoji });
   });
 
   // GROUP CALL ALERT
@@ -227,6 +239,7 @@ io.on("connection", (socket) => {
     }
 
     if (userLeft) {
+      io.emit("presence_update", { userId: userLeft, online: false });
       for (const roomId in callRooms) {
         if (callRooms[roomId].has(userLeft)) {
           callRooms[roomId].delete(userLeft);
