@@ -3,7 +3,7 @@ import { useContext, useMemo, useState } from "react";
 import { ThemeContext } from "../context/ThemeContext";
 import "../assets/Sidebar.css";
 
-const Sidebar = ({ groups = [], selectedGroup, setSelectedGroup, onLogout, onShowModal }) => {
+const Sidebar = ({ groups = [], selectedGroup, setSelectedGroup, onLogout, onShowModal, currentUserId }) => {
   const navigate = useNavigate();
   const { dark, setDark } = useContext(ThemeContext);
 
@@ -90,7 +90,7 @@ const Sidebar = ({ groups = [], selectedGroup, setSelectedGroup, onLogout, onSho
                 }`}
               >
                 <div className="avatar">{g.name?.[0]?.toUpperCase() || "W"}</div>
-                <div className="sidebar-group-copy"><span className="sidebar-group-name">{g.name}</span><small>🔐 Encrypted conversation</small></div>
+                <div className="sidebar-group-copy"><div className="sidebar-group-title"><span className="sidebar-group-name">{g.name}</span>{Number(g.unreadCounts?.[String(currentUserId)] || 0) > 0 && <span className="unread-badge">{g.unreadCounts[String(currentUserId)]}</span>}</div><small>{g.lastMessage || "🔐 Encrypted conversation"}</small></div>
                 <span className="sidebar-chevron">›</span>
               </div>
             ))
