@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" role="img" aria-labelledby="title desc">
+<title id="title">WEBCHAT by WebXWhale</title><desc id="desc">Blue whale-inspired W with a chat bubble and WEBCHAT wordmark.</desc>
+<defs>
+ <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f73ff"/><stop offset=".55" stop-color="#00c8ee"/><stop offset="1" stop-color="#20dff0"/></linearGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="900" height="330" rx="38" fill="#050914"/>
+<g filter="url(#glow)">
+ <path d="M85 70 C140 70 183 70 211 115 L266 205 L322 70 L380 70 L440 187 C498 104 570 76 671 76 C742 76 795 94 838 125 C785 105 734 100 681 105 C586 114 533 158 479 220 L430 275 L370 275 L315 164 L265 260 C246 291 210 291 192 261 Z" fill="url(#g)"/>
+ <path d="M665 130 C705 108 758 115 782 144 C799 165 795 195 773 211 C751 228 719 230 692 222 L665 238 L674 214 C649 199 641 173 650 151 C654 142 659 135 665 130 Z" fill="none" stroke="#20dff0" stroke-width="12"/>
+ <circle cx="691" cy="172" r="7" fill="#fff"/><circle cx="719" cy="172" r="7" fill="#fff"/><circle cx="747" cy="172" r="7" fill="#fff"/>
+ <path d="M563 127 C579 111 603 107 623 114 C609 134 589 144 563 142 Z" fill="#fff"/>
+</g>
+<text x="150" y="314" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800" letter-spacing="2" fill="#fff">WEB</text>
+<text x="443" y="314" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800" letter-spacing="2" fill="url(#g)">CHAT</text>
+</svg>
