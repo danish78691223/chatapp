@@ -5,7 +5,7 @@ const messageSchema = new mongoose.Schema({
   sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   receiver: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // for private chats
   groupId: { type: mongoose.Schema.Types.ObjectId, ref: "Group" }, // for group chats
-  text: { type: String, default: "" },
+  text: { type: String, default: "" }, // legacy plaintext; new E2EE messages use encryptedPayload\n  encryptedPayload: {\n    ciphertext: { type: String },\n    iv: { type: String },\n    salt: { type: String },\n    senderPublicKey: { type: Object },\n    e2eeVersion: { type: Number },\n  },
   file: { type: String, default: null },      // optional file URL (image / video)
   fileType: { type: String, default: null },  // MIME type for media
   createdAt: { type: Date, default: Date.now },
