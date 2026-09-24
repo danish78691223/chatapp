@@ -48,6 +48,9 @@ const ChatPage = ({ selectedGroup }) => {
   const [typingUsers, setTypingUsers] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState(new Set());
   const typingTimer = useRef(null);
+  const [reactionPicker, setReactionPicker] = useState(null);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [contextMessage, setContextMessage] = useState(null);
 
   // ---------------- JOIN SOCKET ROOM ----------------
   useEffect(() => {
@@ -162,6 +165,35 @@ const ChatPage = ({ selectedGroup }) => {
     return () => socket.off("receive_group_message", handler);
   }, [groupId]);
 
+  useEffect(() => {
+    const onReaction = ({ messageId, userId: reactionUserId, emoji }) => {
+      setMessages((prev) => prev.map((msg) =>
+        String(msg._id) === String(messageId)
+          ? {
+              ...msg,
+              reactions: [
+                ...(msg.reactions || []).filter((r) => String(r.user) !== String(reactionUserId)),
+                { user: reactionUserId, emoji },
+              ],
+            }
+          : msg
+      ));
+    };
+    const onRead = ({ messageId, userId: readUserId }) => {
+      setMessages((prev) => prev.map((msg) =>
+        String(msg._id) === String(messageId)
+          ? { ...msg, readBy: [...new Set([...(msg.readBy || []).map(String), String(readUserId)])] }
+          : msg
+      ));
+    };
+    socket.on("message_reaction", onReaction);
+    socket.on("message_read", onRead);
+    return () => {
+      socket.off("message_reaction", onReaction);
+      socket.off("message_read", onRead);
+    };
+  }, [groupId]);
+
   // ---------------- AUTO SCROLL ----------------
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -197,6 +229,7 @@ const ChatPage = ({ selectedGroup }) => {
       sender: userId,
       text: "",
       encryptedPayloads,
+      replyTo: replyingTo?._id || null,
     };
 
     socket.emit("send_group_message", payload);
@@ -208,6 +241,43 @@ const ChatPage = ({ selectedGroup }) => {
     }
 
     setText("");
+    setReplyingTo(null);
+  };
+
+  const addReaction = async (messageId, emoji) => {
+    try {
+      await API.post(`/messages/${messageId}/reaction`, { emoji });
+      setMessages((prev) => prev.map((msg) =>
+        String(msg._id) === String(messageId)
+          ? {
+              ...msg,
+              reactions: [
+                ...(msg.reactions || []).filter((r) => String(r.user) !== String(userId)),
+                { user: userId, emoji },
+              ],
+            }
+          : msg
+      ));
+      socket.emit("message_reaction", { groupId, messageId, userId, emoji });
+    } catch (error) {
+      console.error("Reaction error:", error);
+    }
+    setReactionPicker(null);
+  };
+
+  const markRead = async (messageId) => {
+    if (!messageId || !userId) return;
+    try {
+      await API.patch(`/messages/${messageId}/read`);
+      socket.emit("message_read", { groupId, messageId, userId });
+    } catch (error) {
+      console.warn("Read receipt error:", error);
+    }
+  };
+
+  const replyToMessage = (message) => {
+    setReplyingTo(message);
+    setContextMessage(null);
   };
 
   // ---------------- FILE UPLOAD ----------------
@@ -474,27 +544,66 @@ const joinGroupCall = () => {
         ) : messages.length === 0 ? (
           <p className="no-msg">No messages yet</p>
         ) : (
-          messages.map((msg, i) => (
-            <div
-              key={i}
-              className={msg.sender === userId ? "my-message" : "their-message"}
-            >
-              {msg.file ? (
-                msg.fileType?.startsWith("video") ? (
-                  <video
-                    src={msg.file}
-                    className="chat-media"
-                    muted
-                    onClick={() => handleOpenVideo(msg.file)}
-                  />
-                ) : (
-                  <img src={msg.file} className="chat-media" alt="" />
-                )
-              ) : (
-                <span>{msg.text}</span>
-              )}
-            </div>
-          ))
+          messages.map((msg, i) => {
+            const mine = String(msg.sender) === String(userId);
+            const reactions = msg.reactions || [];
+            return (
+              <div
+                key={msg._id || i}
+                className={`message-shell ${mine ? "mine" : "theirs"}`}
+                onMouseEnter={() => markRead(msg._id)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setContextMessage(msg);
+                }}
+              >
+                <div className={mine ? "my-message" : "their-message"}>
+                  {msg.replyTo?.text && (
+                    <div className="reply-preview">
+                      <strong>Reply</strong>
+                      <span>{msg.replyTo.text}</span>
+                    </div>
+                  )}
+                  {msg.file ? (
+                    msg.fileType?.startsWith("video") ? (
+                      <video src={msg.file} className="chat-media" muted onClick={() => handleOpenVideo(msg.file)} />
+                    ) : (
+                      <img src={msg.file} className="chat-media" alt="" />
+                    )
+                  ) : (
+                    <span>{msg.text}</span>
+                  )}
+                  <div className="message-meta">
+                    <span>{new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                    {mine && <span className={msg.readBy?.length > 1 ? "seen" : ""}>{msg.readBy?.length > 1 ? "✓✓" : "✓"}</span>}
+                  </div>
+                </div>
+                <div className="message-actions">
+                  <button onClick={() => setReactionPicker(reactionPicker === msg._id ? null : msg._id)}>☺</button>
+                  <button onClick={() => replyToMessage(msg)}>↩</button>
+                </div>
+                {reactionPicker === msg._id && (
+                  <div className="reaction-picker">
+                    {["❤️","😂","👍","🔥","😮","👏"].map((emoji) => (
+                      <button key={emoji} onClick={() => addReaction(msg._id, emoji)}>{emoji}</button>
+                    ))}
+                  </div>
+                )}
+                {reactions.length > 0 && (
+                  <div className="reaction-list">
+                    {reactions.map((reaction, index) => <span key={index}>{reaction.emoji}</span>)}
+                  </div>
+                )}
+                {contextMessage?._id === msg._id && (
+                  <div className="message-context">
+                    <button onClick={() => replyToMessage(msg)}>Reply</button>
+                    <button onClick={() => navigator.clipboard?.writeText(msg.text || "")}>Copy</button>
+                    <button onClick={() => setContextMessage(null)}>Close</button>
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
 
         {uploading && uploadPreview && (
@@ -515,6 +624,13 @@ const joinGroupCall = () => {
 
         <div ref={messagesEndRef} />
       </div>
+
+      {replyingTo && (
+        <div className="reply-composer">
+          <div><strong>Replying to</strong><span>{replyingTo.text || "Media message"}</span></div>
+          <button onClick={() => setReplyingTo(null)}>×</button>
+        </div>
+      )}
 
       {/* ✏ INPUT AREA */}
       <div className="send-box">
