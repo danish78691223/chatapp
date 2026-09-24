@@ -1,26 +1,19 @@
 import { createContext, useEffect, useState } from "react";
-import { getUserState } from "../utils/getLocation";
 
 export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [dark, setDark] = useState(true); // default dark
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem("webchat-theme");
+    return saved ? saved === "dark" : true;
+  });
 
   useEffect(() => {
-    (async () => {
-      const state = await getUserState();
-      const currentHour = new Date().getHours();
-
-      const southStates = ["Tamil Nadu", "Kerala", "Karnataka", "Andhra Pradesh", "Telangana"];
-
-      // ✅ WHITE THEME for South states + time 10 AM to 12 PM
-      if (southStates.includes(state) && currentHour >= 10 && currentHour <= 12) {
-        setDark(false);
-      } else {
-        setDark(true);
-      }
-    })();
-  }, []);
+    const mode = dark ? "dark" : "light";
+    localStorage.setItem("webchat-theme", mode);
+    document.documentElement.dataset.theme = mode;
+    document.documentElement.style.colorScheme = mode;
+  }, [dark]);
 
   return (
     <ThemeContext.Provider value={{ dark, setDark }}>
