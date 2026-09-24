@@ -107,7 +107,11 @@ const Home = ({ user, setUser }) => {
 
       {/* Chat Area */}
       <div className="chat-area">
-        {!notificationsEnabled && "Notification" in window && Notification.permission !== "denied" && <button className="notification-optin" onClick={enableNotifications}>🔔 Enable notifications</button>
+        {!notificationsEnabled && "Notification" in window && Notification.permission !== "denied" && (
+          <button className="notification-optin" onClick={enableNotifications}>
+            🔔 Enable notifications
+          </button>
+        )}
         {selectedGroup ? (
           (isMember || isCreator) ? (
             <ChatPage selectedGroup={selectedGroup} />
