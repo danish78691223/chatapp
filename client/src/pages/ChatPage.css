@@ -9,3 +9,9 @@
 .their-message{align-self:flex-start}
 .message-meta{right:9px;bottom:4px;white-space:nowrap}
 @media(max-width:680px){.my-message,.their-message{max-width:84%;width:fit-content}}
+
+/* Keep timestamp/read receipt inside compact bubbles. */
+.my-message,.their-message{padding:9px 11px 7px;overflow:hidden}
+.message-meta{position:static;display:flex;align-items:center;justify-content:flex-end;gap:4px;width:100%;margin-top:3px;color:var(--muted);font-size:8px;line-height:1;white-space:nowrap;pointer-events:none}
+.my-message .message-meta{color:rgba(255,255,255,.72)}
+.message-meta .seen{color:#8fe8ff}
