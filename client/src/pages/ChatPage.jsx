@@ -136,20 +136,38 @@ const ChatPage = ({ selectedGroup }) => {
   useEffect(() => {
     if (!groupId) return;
 
+    let active = true;
+
     const load = async () => {
       setLoading(true);
       try {
         const res = await API.get(`/messages/group/${groupId}`);
+        const items = Array.isArray(res.data) ? res.data : [];
+
+        // A brand-new/empty group should render immediately. E2EE identity
+        // setup must not block the initial message screen.
+        if (!items.length) {
+          if (active) setMessages([]);
+          return;
+        }
+
         await ensureIdentity();
-        setMessages(await decryptGroupMessages(res.data));
+        const decrypted = await decryptGroupMessages(items);
+
+        if (active) setMessages(decrypted);
       } catch (err) {
-        console.error("Fetch msg error:", err);
+        console.error("Fetch msg error:", err?.response?.data || err?.message || err);
+        if (active) setMessages([]);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     load();
+
+    return () => {
+      active = false;
+    };
   }, [groupId]);
 
   // ---------------- LIVE MESSAGES ----------------
