@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // src/pages/ChatPage.jsx
 import React, { useEffect, useState, useRef } from "react";
+import { FiSmile, FiCornerUpLeft, FiCopy, FiX } from "react-icons/fi";
 import { useParams } from "react-router-dom";
 import API from "../api/axios";
 import "./ChatPage.css";
@@ -58,6 +59,7 @@ const ChatPage = ({ selectedGroup }) => {
   const [reactionPicker, setReactionPicker] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
   const [contextMessage, setContextMessage] = useState(null);
+  const longPressTimer = useRef(null);
 
   // ---------------- JOIN SOCKET ROOM ----------------
   useEffect(() => {
@@ -337,6 +339,42 @@ const ChatPage = ({ selectedGroup }) => {
     setContextMessage(null);
   };
 
+  const openMessageMenu = (event, message) => {
+    event.preventDefault();
+    const x = event.clientX;
+    const y = event.clientY;
+    setContextMessage({ message, x, y });
+    setReactionPicker(null);
+  };
+
+  const startLongPress = (event, message) => {
+    if (!event.touches?.length) return;
+    const touch = event.touches[0];
+
+    clearTimeout(longPressTimer.current);
+    longPressTimer.current = setTimeout(() => {
+      setContextMessage({
+        message,
+        x: touch.clientX,
+        y: touch.clientY,
+      });
+      setReactionPicker(null);
+    }, 550);
+  };
+
+  const cancelLongPress = () => {
+    clearTimeout(longPressTimer.current);
+  };
+
+  const copyMessage = async (message) => {
+    try {
+      if (message.text) await navigator.clipboard?.writeText(message.text);
+    } catch (error) {
+      console.warn("Copy message failed:", error);
+    }
+    setContextMessage(null);
+  };
+
   // ---------------- FILE UPLOAD ----------------
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -415,6 +453,22 @@ const joinGroupCall = () => {
   setShowCallModal(true);
 };
 
+
+  useEffect(() => {
+    const closeMenu = () => setContextMessage(null);
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") closeMenu();
+    };
+    window.addEventListener("click", closeMenu);
+    window.addEventListener("scroll", closeMenu, true);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("click", closeMenu);
+      window.removeEventListener("scroll", closeMenu, true);
+      window.removeEventListener("keydown", onKeyDown);
+      clearTimeout(longPressTimer.current);
+    };
+  }, []);
 
   // --------------------------------------------------
   //  RETURN JSX
@@ -616,10 +670,11 @@ const joinGroupCall = () => {
                 key={msg._id || i}
                 className={`message-shell ${mine ? "mine" : "theirs"}`}
                 onMouseEnter={() => markRead(msg._id)}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  setContextMessage(msg);
-                }}
+                onContextMenu={(e) => openMessageMenu(e, msg)}
+                onTouchStart={(e) => startLongPress(e, msg)}
+                onTouchMove={cancelLongPress}
+                onTouchEnd={cancelLongPress}
+                onTouchCancel={cancelLongPress}
               >
                 <div className={mine ? "my-message" : "their-message"}>
                   {msg.replyTo?.text && (
@@ -642,10 +697,6 @@ const joinGroupCall = () => {
                     {mine && <span className={msg.readBy?.length > 1 ? "seen" : ""}>{msg.readBy?.length > 1 ? "✓✓" : "✓"}</span>}
                   </div>
                 </div>
-                <div className="message-actions">
-                  <button onClick={() => setReactionPicker(reactionPicker === msg._id ? null : msg._id)}>☺</button>
-                  <button onClick={() => replyToMessage(msg)}>↩</button>
-                </div>
                 {reactionPicker === msg._id && (
                   <div className="reaction-picker">
                     {["❤️","😂","👍","🔥","😮","👏"].map((emoji) => (
@@ -658,13 +709,7 @@ const joinGroupCall = () => {
                     {reactions.map((reaction, index) => <span key={index}>{reaction.emoji}</span>)}
                   </div>
                 )}
-                {contextMessage?._id === msg._id && (
-                  <div className="message-context">
-                    <button onClick={() => replyToMessage(msg)}>Reply</button>
-                    <button onClick={() => navigator.clipboard?.writeText(msg.text || "")}>Copy</button>
-                    <button onClick={() => setContextMessage(null)}>Close</button>
-                  </div>
-                )}
+
               </div>
             );
           })
@@ -688,6 +733,36 @@ const joinGroupCall = () => {
 
         <div ref={messagesEndRef} />
       </div>
+
+      {contextMessage?.message && (
+        <div
+          className="message-context-menu"
+          style={{
+            left: Math.min(contextMessage.x, window.innerWidth - 190),
+            top: Math.min(contextMessage.y, window.innerHeight - 230),
+          }}
+          onClick={(event) => event.stopPropagation()}
+          onContextMenu={(event) => event.preventDefault()}
+        >
+          <div className="context-menu-title">Message actions</div>
+          <button onClick={() => {
+            setReactionPicker(contextMessage.message._id);
+            setContextMessage(null);
+          }}>
+            <FiSmile /> <span>React</span>
+          </button>
+          <button onClick={() => replyToMessage(contextMessage.message)}>
+            <FiCornerUpLeft /> <span>Reply</span>
+          </button>
+          <button onClick={() => copyMessage(contextMessage.message)}>
+            <FiCopy /> <span>Copy text</span>
+          </button>
+          <div className="context-menu-divider" />
+          <button className="context-close" onClick={() => setContextMessage(null)}>
+            <FiX /> <span>Close</span>
+          </button>
+        </div>
+      )}
 
       {replyingTo && (
         <div className="reply-composer">
