@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import API from "../api/axios";
 import "./ChatPage.css";
 import socket from "../socket";
+import { decryptFromSender, encryptForRecipient, ensureIdentity } from "../services/cryptoService";
 
 import EmojiPicker from "emoji-picker-react";
 import VideoPlayer from "../components/VideoPlayer";
@@ -72,6 +73,26 @@ const ChatPage = ({ selectedGroup }) => {
     };
   }, [userId]);
 
+  const decryptGroupMessages = async (items) => {
+    return Promise.all(
+      items.map(async (msg) => {
+        if (!msg.encryptedPayloads?.length) return msg;
+        const envelope = msg.encryptedPayloads.find(
+          (item) => String(item.recipient) === String(userId)
+        );
+        if (!envelope?.payload) return { ...msg, text: "🔒 Encrypted message" };
+
+        try {
+          const plaintext = await decryptFromSender(envelope.payload);
+          return { ...msg, text: plaintext, e2ee: true };
+        } catch (error) {
+          console.warn("Unable to decrypt message:", error);
+          return { ...msg, text: "🔒 Unable to decrypt this message", e2ee: true };
+        }
+      })
+    );
+  };
+
   // ---------------- FETCH MESSAGES ----------------
   useEffect(() => {
     if (!groupId) return;
@@ -80,7 +101,8 @@ const ChatPage = ({ selectedGroup }) => {
       setLoading(true);
       try {
         const res = await API.get(`/messages/group/${groupId}`);
-        setMessages(res.data);
+        await ensureIdentity();
+        setMessages(await decryptGroupMessages(res.data));
       } catch (err) {
         console.error("Fetch msg error:", err);
       } finally {
@@ -95,7 +117,9 @@ const ChatPage = ({ selectedGroup }) => {
   useEffect(() => {
     const handler = (msg) => {
       if (msg.groupId === groupId) {
-        setMessages((prev) => [...prev, msg]);
+        decryptGroupMessages([msg]).then(([decrypted]) =>
+          setMessages((prev) => [...prev, decrypted])
+        );
       }
     };
 
@@ -112,7 +136,33 @@ const ChatPage = ({ selectedGroup }) => {
   const handleSend = async () => {
     if (!text.trim()) return;
 
-    const payload = { groupId, sender: userId, text };
+    const members = selectedGroup?.members || [];
+    const encryptedPayloads = [];
+
+    for (const member of members) {
+      if (!member.publicKey) continue;
+      try {
+        const encryptedPayload = await encryptForRecipient(text, member.publicKey);
+        encryptedPayloads.push({
+          recipient: member._id,
+          payload: encryptedPayload,
+        });
+      } catch (error) {
+        console.warn("Skipping member without a valid E2EE key:", member._id);
+      }
+    }
+
+    if (!encryptedPayloads.length) {
+      console.error("No group member has an E2EE public key.");
+      return;
+    }
+
+    const payload = {
+      groupId,
+      sender: userId,
+      text: "",
+      encryptedPayloads,
+    };
 
     socket.emit("send_group_message", payload);
 
