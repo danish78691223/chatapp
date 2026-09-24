@@ -45,6 +45,9 @@ const ChatPage = ({ selectedGroup }) => {
   // ---------------- UPLOAD ----------------
   const [uploading, setUploading] = useState(false);
   const [uploadPreview, setUploadPreview] = useState(null);
+  const [typingUsers, setTypingUsers] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState(new Set());
+  const typingTimer = useRef(null);
 
   // ---------------- JOIN SOCKET ROOM ----------------
   useEffect(() => {
@@ -91,6 +94,38 @@ const ChatPage = ({ selectedGroup }) => {
         }
       })
     );
+  };
+
+  useEffect(() => {
+    const onTyping = ({ userId: typingUserId, isTyping }) => {
+      if (String(typingUserId) === String(userId)) return;
+      setTypingUsers((prev) => isTyping
+        ? [...new Set([...prev, String(typingUserId)])]
+        : prev.filter((id) => id !== String(typingUserId)));
+    };
+    const onPresence = ({ userId: changedUserId, online }) => {
+      setOnlineUsers((prev) => {
+        const next = new Set(prev);
+        online ? next.add(String(changedUserId)) : next.delete(String(changedUserId));
+        return next;
+      });
+    };
+    socket.on("user_typing", onTyping);
+    socket.on("presence_update", onPresence);
+    return () => {
+      socket.off("user_typing", onTyping);
+      socket.off("presence_update", onPresence);
+    };
+  }, [userId]);
+
+  const handleTyping = (value) => {
+    setText(value);
+    if (!groupId || !userId) return;
+    socket.emit("typing", { groupId, userId, isTyping: true });
+    clearTimeout(typingTimer.current);
+    typingTimer.current = setTimeout(() => {
+      socket.emit("typing", { groupId, userId, isTyping: false });
+    }, 1200);
   };
 
   // ---------------- FETCH MESSAGES ----------------
@@ -370,7 +405,11 @@ const joinGroupCall = () => {
           <div>
             <h3 className="group-title">{selectedGroup?.name}</h3>
             <p className="group-members">
-              {selectedGroup?.members?.map((m) => m.name).join(", ")}
+              {typingUsers.length
+                ? "typing..."
+                : onlineUsers.size
+                  ? `${onlineUsers.size} online`
+                  : `${selectedGroup?.members?.length || 0} members`}
             </p>
           </div>
         </div>
@@ -503,7 +542,7 @@ const joinGroupCall = () => {
           type="text"
           placeholder="Type message..."
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => handleTyping(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
         />
 
