@@ -35,6 +35,7 @@ const ChatPage = ({ selectedGroup }) => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -140,11 +141,12 @@ const ChatPage = ({ selectedGroup }) => {
 
     const load = async () => {
       setLoading(true);
+      setLoadError("");
 
       try {
         // Fetch the message list independently from E2EE initialization.
         // E2EE key registration must never block the chat screen forever.
-        const res = await API.get(`/messages/group/${groupId}`);
+        const res = await API.get(`/messages/group/${groupId}`, { timeout: 15000 });
         const items = Array.isArray(res.data) ? res.data : [];
 
         if (!active) return;
@@ -184,6 +186,11 @@ const ChatPage = ({ selectedGroup }) => {
         console.error("Fetch msg error:", err?.response?.data || err?.message || err);
         if (active) {
           setMessages([]);
+          setLoadError(
+            err?.code === "ECONNABORTED"
+              ? "Message server took too long to respond. Please retry."
+              : (err?.response?.data?.message || "Unable to load messages.")
+          );
           setLoading(false);
         }
       }
@@ -584,6 +591,13 @@ const joinGroupCall = () => {
 
       {/* 💬 MESSAGES */}
       <div className="messages">
+        {loadError && (
+          <div className="chat-load-error">
+            <strong>Couldn&apos;t load messages</strong>
+            <span>{loadError}</span>
+            <button onClick={() => window.location.reload()}>Retry</button>
+          </div>
+        )}
         {loading ? (
           <p className="loading">Loading messages...</p>
         ) : messages.length === 0 ? (
