@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { ThemeContext } from "../context/ThemeContext";
 import "../assets/Sidebar.css";
 
@@ -9,6 +9,15 @@ const Sidebar = ({ groups = [], selectedGroup, setSelectedGroup, onLogout, onSho
 
   // ⭐ Hamburger state
   const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+
+  const visibleGroups = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    const filtered = groups.filter((g) => !query || g.name?.toLowerCase().includes(query));
+    if (filter === "active" && selectedGroup) return filtered.filter((g) => g._id === selectedGroup._id);
+    return filtered;
+  }, [groups, search, filter, selectedGroup]);
 
   const openSidebar = () => setIsOpen(true);
   const closeSidebar = () => setIsOpen(false);
@@ -33,8 +42,13 @@ const Sidebar = ({ groups = [], selectedGroup, setSelectedGroup, onLogout, onSho
           ✖
         </button>
 
+        <div className="sidebar-brand">
+          <div className="sidebar-brand-mark">W</div>
+          <div><strong>WEBXWHALE</strong><span>Private Chat</span></div>
+        </div>
+
         <div className="sidebar-header">
-          <h2>Groups</h2>
+          <div><h2>Messages</h2><span className="sidebar-count">{groups.length} conversation{groups.length === 1 ? "" : "s"}</span></div>
 
           <button onClick={() => setDark(!dark)} className="theme-btn">
             {dark ? "☀️" : "🌙"}
@@ -52,11 +66,22 @@ const Sidebar = ({ groups = [], selectedGroup, setSelectedGroup, onLogout, onSho
           </button>
         </div>
 
+        <div className="sidebar-search">
+          <span>⌕</span>
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search conversations..." aria-label="Search conversations" />
+          {search && <button onClick={() => setSearch("")} aria-label="Clear search">×</button>}
+        </div>
+
+        <div className="sidebar-filters">
+          <button className={filter === "all" ? "active" : ""} onClick={() => setFilter("all")}>All</button>
+          <button className={filter === "active" ? "active" : ""} onClick={() => setFilter("active")}>Active</button>
+        </div>
+
         <div className="sidebar-list">
-          {groups.length === 0 ? (
+          {visibleGroups.length === 0 ? (
             <p style={{ color: "#888", textAlign: "center" }}>No groups</p>
           ) : (
-            groups.map((g) => (
+            visibleGroups.map((g) => (
               <div
                 key={g._id}
                 onClick={() => handleSelectGroup(g)}
@@ -64,8 +89,9 @@ const Sidebar = ({ groups = [], selectedGroup, setSelectedGroup, onLogout, onSho
                   selectedGroup?._id === g._id ? "active-group" : ""
                 }`}
               >
-                <div className="avatar">{g.name[0].toUpperCase()}</div>
-                <span className="sidebar-group-name">{g.name}</span>
+                <div className="avatar">{g.name?.[0]?.toUpperCase() || "W"}</div>
+                <div className="sidebar-group-copy"><span className="sidebar-group-name">{g.name}</span><small>🔐 Encrypted conversation</small></div>
+                <span className="sidebar-chevron">›</span>
               </div>
             ))
           )}
