@@ -31,6 +31,7 @@ const server = http.createServer(app);
 // ===============================
 const allowedOrigins = [
   "http://localhost:3000",
+  "http://localhost:3001",
   "https://chatapp-virid-three-86.vercel.app",                          // Production
   "https://chatapp-git-main-danish-nasib-khans-projects.vercel.app",    // Preview (main branch)
   "https://chatapp-5hy0nbh0y-danish-nasib-khans-projects.vercel.app"    // Latest preview
@@ -50,7 +51,7 @@ app.use(
         callback(new Error("❌ Not allowed by CORS"));
       }
     },
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
   })
 );
