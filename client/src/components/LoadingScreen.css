@@ -1,0 +1,31 @@
+.webchat-loader{position:fixed;inset:0;z-index:100000;overflow:hidden;display:grid;place-items:center;background:#030711;color:#fff;isolation:isolate}
+.loader-glow{position:absolute;width:70vw;height:70vw;border-radius:50%;background:radial-gradient(circle,rgba(0,190,239,.16),transparent 62%);filter:blur(20px);animation:loaderPulse 3s ease-in-out infinite}
+.loader-content{position:relative;z-index:5;width:min(620px,78vw);display:flex;flex-direction:column;align-items:center;text-align:center;animation:loaderEnter .8s ease-out both}
+.loader-logo{width:min(500px,76vw);height:auto;filter:drop-shadow(0 18px 50px rgba(0,190,239,.22))}
+.loader-status{margin-top:22px;display:flex;align-items:center;gap:8px;font-size:9px;font-weight:800;letter-spacing:.18em;color:#91a6c9}
+.loader-status span{width:7px;height:7px;border-radius:50%;background:#21d9a1;box-shadow:0 0 14px #21d9a1;animation:statusBlink 1s ease-in-out infinite}
+.loader-progress{width:min(250px,55vw);height:3px;margin-top:18px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.08)}
+.loader-progress span{display:block;height:100%;width:20%;border-radius:inherit;background:linear-gradient(90deg,#246dff,#16d8ef);animation:progressRun 5.7s cubic-bezier(.2,.7,.2,1) forwards}
+.loader-content p{margin:12px 0 0;color:#71809e;font-size:10px}
+.ocean{position:absolute;inset:auto 0 0;height:48%;z-index:3;pointer-events:none}
+.wave{position:absolute;left:-8%;width:116%;height:190px;border-radius:48% 52% 0 0/100% 100% 0 0;background:#07152a;transform:translateY(105%);animation:waveRise 6.2s cubic-bezier(.55,.05,.25,.95) forwards}
+.wave-back{bottom:5%;opacity:.75;background:#0b2440;animation-delay:1.2s}
+.wave-mid{bottom:-1%;height:160px;background:#082c4a;animation-delay:2.5s}
+.wave-front{bottom:-8%;height:135px;background:linear-gradient(180deg,#0d5876,#06182c);animation-delay:3.8s}
+.wave:after{content:"";position:absolute;left:-10%;top:-12px;width:120%;height:32px;border-radius:50%;background:linear-gradient(90deg,transparent,rgba(27,218,240,.55),transparent);filter:blur(7px);animation:waveShimmer 2.2s linear infinite}
+.loader-sheen{position:absolute;inset:0;z-index:8;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.08) 48%,transparent 66%);transform:translateX(-120%);animation:sheen 1.3s ease-in 5.55s forwards;pointer-events:none}
+.webchat-loader.is-leaving{animation:loaderExit 1s ease-in forwards}
+.webchat-loader.is-leaving .loader-content{animation:logoSink .9s ease-in forwards}
+.webchat-loader.is-leaving .ocean{animation:oceanCover .9s ease-in forwards}
+@keyframes loaderEnter{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes loaderPulse{50%{transform:scale(1.08);opacity:.72}}
+@keyframes statusBlink{50%{opacity:.35;transform:scale(.7)}}
+@keyframes progressRun{to{width:100%}}
+@keyframes waveRise{0%{transform:translateY(105%)}72%,100%{transform:translateY(0)}}
+@keyframes waveShimmer{to{transform:translateX(30%)}}
+@keyframes sheen{to{transform:translateX(120%)}}
+@keyframes logoSink{to{opacity:0;transform:scale(.78) translateY(18px);filter:blur(5px)}}
+@keyframes oceanCover{to{transform:scale(1.12) translateY(-6%);filter:brightness(1.15)}}
+@keyframes loaderExit{to{opacity:0;visibility:hidden}}
+@media(max-width:600px){.loader-logo{width:88vw}.loader-status{font-size:8px}.ocean{height:42%}}
+@media(prefers-reduced-motion:reduce){.webchat-loader *{animation-duration:.01ms!important;animation-delay:0ms!important}.webchat-loader{animation:none}.webchat-loader.is-leaving{animation:loaderExit .2s forwards}}
