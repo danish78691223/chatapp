@@ -1,11 +1,1 @@
-import React from "react";
-
-const SubscriptionSuccess = () => (
-  <div style={{ textAlign: "center", marginTop: "40px" }}>
-    <h1>🎉 Payment Successful</h1>
-    <p>Your subscription has been upgraded successfully.</p>
-    <a href="/subscription">Go Back</a>
-  </div>
-);
-
-export default SubscriptionSuccess;
+import React from "react";import { useNavigate } from "react-router-dom";import "./SubscriptionSuccess.css";const SubscriptionSuccess=()=>{const navigate=useNavigate();return <div className="success-page"><div className="success-card"><div className="success-icon">✓</div><span className="eyebrow">PAYMENT COMPLETE</span><h1>You're upgraded.</h1><p>Your WEBCHAT plan has been updated successfully.</p><button onClick={()=>navigate("/home")}>Return to WEBCHAT</button></div></div>};export default SubscriptionSuccess;
