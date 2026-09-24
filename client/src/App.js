@@ -12,7 +12,7 @@ import LoadingScreen from "./components/LoadingScreen";
 
 function App() {
   const [user, setUser] = useState(null);
-  const [booting, setBooting] = useState(true);
+
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
@@ -26,7 +26,9 @@ function App() {
   }, []);
 
   return (
-    <Router>
+    <>
+      <LoadingScreen />
+      <Router>
       <Routes>
         <Route path="/" element={<Navigate to={user ? "/home" : "/login"} replace />} />
         <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to="/home" replace />} />
@@ -39,7 +41,8 @@ function App() {
         <Route path="/success" element={user ? <SubscriptionSuccess /> : <Navigate to="/login" replace />} />
         <Route path="/player" element={user ? <VideoPlayer /> : <Navigate to="/login" replace />} />
       </Routes>
-    </Router>
+      </Router>
+    </>
   );
 }
 
