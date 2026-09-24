@@ -1,276 +1,53 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-:root {
-  --wx-bg: #f5f7fb;
-  --wx-surface: rgba(255,255,255,.86);
-  --wx-border: rgba(18,31,53,.08);
-  --wx-text: #142033;
-  --wx-muted: #748096;
-  --wx-primary: #5b5cf0;
-  --wx-primary-2: #8b5cf6;
-  --wx-shadow: 0 24px 70px rgba(38,44,84,.12);
+:root{
+  --wx-bg:#070b16;--wx-panel:#0c1224;--wx-panel-2:#10172b;--wx-border:rgba(255,255,255,.075);
+  --wx-text:#f3f5fb;--wx-muted:#7d89a5;--wx-primary:#6d5dfc;--wx-cyan:#25d0ff;
 }
-
-* { box-sizing: border-box; }
-
-.webxwhale-app {
-  font-family: "Inter", sans-serif;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
+*{box-sizing:border-box}
+.webxwhale-app{
+  font-family:"Inter",sans-serif;width:100%;height:100vh;min-height:100vh;display:flex;overflow:hidden;
+  color:var(--wx-text);
   background:
-    radial-gradient(circle at 75% 10%, rgba(139,92,246,.13), transparent 28%),
-    radial-gradient(circle at 35% 90%, rgba(91,92,240,.10), transparent 30%),
-    var(--wx-bg);
-  color: var(--wx-text);
+    radial-gradient(circle at 78% 8%,rgba(109,93,252,.13),transparent 27%),
+    radial-gradient(circle at 52% 100%,rgba(37,208,255,.055),transparent 30%),
+    #070b16;
 }
-
-.webxwhale-app .sidebar {
-  width: 310px;
-  flex: 0 0 310px;
-  background: var(--wx-surface);
-  backdrop-filter: blur(22px);
-  border-right: 1px solid var(--wx-border);
-  box-shadow: 12px 0 45px rgba(27,34,63,.06);
-  display: flex;
-  flex-direction: column;
-  z-index: 5;
+.webxwhale-app .chat-area{flex:1;min-width:0;height:100%;position:relative;background:rgba(7,11,22,.62)}
+.webxwhale-app .welcome-placeholder{
+  height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;
+  background:radial-gradient(circle at center,rgba(109,93,252,.08),transparent 42%);
 }
-
-.webxwhale-app .sidebar-header {
-  min-height: 76px;
-  padding: 16px 18px;
-  background: transparent;
-  color: var(--wx-text);
-  border-bottom: 1px solid var(--wx-border);
+.welcome-orb{
+  width:82px;height:82px;display:grid;place-items:center;border-radius:26px;margin-bottom:22px;
+  color:#fff;font-size:30px;font-weight:900;
+  background:linear-gradient(135deg,#6d5dfc,#25d0ff);
+  box-shadow:0 22px 60px rgba(73,82,235,.28);
 }
-
-.webxwhale-app .sidebar-header h2 {
-  font-size: 1.08rem;
-  letter-spacing: -.02em;
+.welcome-eyebrow{margin:0 0 10px;color:#8e84ff;font-size:11px;font-weight:800;letter-spacing:.24em}
+.welcome-placeholder h2{margin:0;color:#f6f7fb;font-size:clamp(2rem,4vw,3.2rem);line-height:1.05;letter-spacing:-.055em}
+.welcome-placeholder>p:not(.welcome-eyebrow){margin:16px 0 0;color:#7f8ba7;font-size:13px}
+.welcome-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:24px}
+.welcome-badges span{
+  padding:8px 11px;border:1px solid rgba(255,255,255,.07);border-radius:999px;
+  background:rgba(255,255,255,.035);color:#8c97b1;font-size:10px
 }
-
-.webxwhale-app .sidebar-header h2::before {
-  content: "W";
-  display: inline-flex;
-  width: 30px;
-  height: 30px;
-  align-items: center;
-  justify-content: center;
-  margin-right: 9px;
-  border-radius: 10px;
-  color: white;
-  background: linear-gradient(135deg, var(--wx-primary), var(--wx-primary-2));
-  box-shadow: 0 8px 22px rgba(91,92,240,.28);
+.notification-optin{
+  position:absolute;top:14px;right:18px;z-index:30;border:1px solid rgba(109,93,252,.35);
+  background:rgba(14,20,38,.92);color:#eef1ff;border-radius:11px;padding:9px 12px;font-weight:700;font-size:10px;
+  cursor:pointer;backdrop-filter:blur(14px);box-shadow:0 12px 30px rgba(0,0,0,.2)
 }
-
-.webxwhale-app .sidebar-logout,
-.webxwhale-app .profile-btn,
-.webxwhale-app .theme-btn {
-  border: 0;
-  background: rgba(20,32,51,.05);
-  color: var(--wx-text);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: transform .2s ease, background .2s ease;
+.notification-optin:hover{border-color:rgba(37,208,255,.45);transform:translateY(-1px)}
+.modal{
+  position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100;width:min(400px,calc(100vw - 30px));
+  padding:24px;border:1px solid rgba(255,255,255,.08);border-radius:20px;background:#10172b;
+  box-shadow:0 30px 90px rgba(0,0,0,.5)
 }
-
-.webxwhale-app .sidebar-logout { padding: 7px 10px; }
-.webxwhale-app .theme-btn, .webxwhale-app .profile-btn { padding: 7px 9px; }
-.webxwhale-app .sidebar-logout:hover,
-.webxwhale-app .profile-btn:hover,
-.webxwhale-app .theme-btn:hover { transform: translateY(-2px); background: rgba(91,92,240,.10); }
-
-.webxwhale-app .sidebar-list {
-  padding: 14px 10px;
-  overflow-y: auto;
-  scrollbar-width: thin;
+.modal input{width:100%;padding:13px;border:1px solid rgba(255,255,255,.09);border-radius:11px;outline:0;background:#0a1020;color:#fff}
+.modal button{border:0;border-radius:11px;padding:11px 14px;cursor:pointer;font-weight:700}
+.modal button:first-of-type{background:#6d5dfc;color:#fff}.modal button:last-of-type{background:#1a2238;color:#aeb7cc}
+@media(max-width:768px){
+  .webxwhale-app .chat-area{width:100%}
+  .welcome-placeholder h2{font-size:2.1rem}
+  .welcome-badges{max-width:330px}
 }
-
-.webxwhale-app .sidebar-group-item {
-  position: relative;
-  padding: 11px 12px;
-  margin: 4px 0;
-  border-radius: 15px;
-  transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
-}
-
-.webxwhale-app .sidebar-group-item:hover {
-  transform: translateX(3px);
-  background: rgba(91,92,240,.07);
-}
-
-.webxwhale-app .active-group {
-  background: linear-gradient(100deg, rgba(91,92,240,.13), rgba(139,92,246,.06)) !important;
-  box-shadow: inset 3px 0 0 var(--wx-primary);
-}
-
-.webxwhale-app .avatar {
-  width: 45px;
-  height: 45px;
-  margin-right: 12px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--wx-primary), var(--wx-primary-2));
-  box-shadow: 0 9px 22px rgba(91,92,240,.22);
-}
-
-.webxwhale-app .sidebar-group-name {
-  font-size: .94rem;
-  color: var(--wx-text);
-}
-
-.webxwhale-app .sidebar-create-btn,
-.webxwhale-app .upgrade-btn {
-  margin: 10px 15px;
-  border: 0;
-  border-radius: 13px;
-  padding: 12px;
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-  background: linear-gradient(135deg, var(--wx-primary), var(--wx-primary-2));
-  box-shadow: 0 12px 25px rgba(91,92,240,.22);
-  transition: transform .2s ease, box-shadow .2s ease;
-}
-
-.webxwhale-app .sidebar-create-btn:hover,
-.webxwhale-app .upgrade-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 32px rgba(91,92,240,.28);
-}
-
-.webxwhale-app .upgrade-plan-container { margin-top: auto; }
-
-.webxwhale-app .upgrade-btn {
-  width: calc(100% - 30px);
-  margin-bottom: 0;
-}
-
-.webxwhale-app .chat-area {
-  flex: 1;
-  min-width: 0;
-  background: transparent;
-  position: relative;
-}
-
-.webxwhale-app .welcome-placeholder {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 30px;
-  animation: wxFadeUp .55s ease both;
-}
-
-.welcome-orb {
-  width: 86px;
-  height: 86px;
-  display: grid;
-  place-items: center;
-  border-radius: 28px;
-  margin-bottom: 22px;
-  color: white;
-  font-size: 2rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--wx-primary), var(--wx-primary-2));
-  box-shadow: 0 20px 55px rgba(91,92,240,.30);
-  animation: wxFloat 4s ease-in-out infinite;
-}
-
-.welcome-eyebrow {
-  margin-bottom: 10px;
-  color: var(--wx-primary);
-  font-size: .74rem;
-  font-weight: 800;
-  letter-spacing: .2em;
-}
-
-.welcome-placeholder h2 {
-  margin: 0;
-  font-size: clamp(2rem, 4vw, 3.3rem);
-  line-height: 1.06;
-  letter-spacing: -.055em;
-}
-
-.welcome-placeholder > p:not(.welcome-eyebrow) {
-  margin: 16px 0 0;
-  color: var(--wx-muted);
-  font-size: .96rem;
-}
-
-.welcome-badges {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 9px;
-  margin-top: 24px;
-}
-
-.welcome-badges span {
-  padding: 8px 12px;
-  border: 1px solid var(--wx-border);
-  border-radius: 999px;
-  background: rgba(255,255,255,.68);
-  color: var(--wx-muted);
-  font-size: .78rem;
-  box-shadow: 0 8px 22px rgba(27,34,63,.05);
-}
-
-.modal {
-  width: min(380px, calc(100vw - 30px));
-  border-radius: 22px;
-  padding: 24px;
-  background: white;
-  box-shadow: var(--wx-shadow);
-}
-
-.modal input {
-  border: 1px solid var(--wx-border);
-  border-radius: 12px;
-  padding: 13px;
-  outline: none;
-}
-
-.modal button {
-  border: 0;
-  border-radius: 12px;
-  padding: 11px;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.modal button:first-of-type {
-  background: var(--wx-primary);
-  color: white;
-}
-
-.modal button:last-of-type { background: #eef0f5; color: var(--wx-text); }
-
-@keyframes wxFadeUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes wxFloat {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(2deg); }
-}
-
-@media (max-width: 768px) {
-  .webxwhale-app .sidebar {
-    width: min(310px, 88vw);
-    flex-basis: 0;
-    position: fixed;
-    inset: 0 auto 0 0;
-    transform: translateX(-105%);
-    transition: transform .28s cubic-bezier(.2,.8,.2,1);
-  }
-  .webxwhale-app .sidebar.open { transform: translateX(0); }
-  .webxwhale-app .chat-area { width: 100%; }
-  .welcome-placeholder h2 { font-size: 2.1rem; }
-  .welcome-badges { max-width: 320px; }
-}
-
-.notification-optin{position:absolute;top:14px;right:18px;z-index:30;border:1px solid rgba(109,93,252,.35);background:rgba(18,23,43,.88);color:#eef1ff;border-radius:12px;padding:9px 13px;font-weight:700;font-size:.75rem;cursor:pointer;backdrop-filter:blur(14px);box-shadow:0 10px 28px rgba(0,0,0,.2)}.notification-optin:hover{transform:translateY(-1px);border-color:rgba(37,208,255,.5)}
