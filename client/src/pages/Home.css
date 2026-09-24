@@ -272,3 +272,5 @@
   .welcome-placeholder h2 { font-size: 2.1rem; }
   .welcome-badges { max-width: 320px; }
 }
+
+.notification-optin{position:absolute;top:14px;right:18px;z-index:30;border:1px solid rgba(109,93,252,.35);background:rgba(18,23,43,.88);color:#eef1ff;border-radius:12px;padding:9px 13px;font-weight:700;font-size:.75rem;cursor:pointer;backdrop-filter:blur(14px);box-shadow:0 10px 28px rgba(0,0,0,.2)}.notification-optin:hover{transform:translateY(-1px);border-color:rgba(37,208,255,.5)}
