@@ -64,7 +64,7 @@ const Home = ({ user, setUser }) => {
     selectedGroup?.creator === currentUserId;
 
   return (
-    <div className="chatapp-shell">
+    <div className="chatapp-shell webxwhale-app">
 
       {/* Sidebar */}
       <Sidebar
@@ -116,8 +116,15 @@ const Home = ({ user, setUser }) => {
           )
         ) : (
           <div className="welcome-placeholder">
-            <h2>Welcome to Chat App</h2>
-            <p>Select a group to start chatting.</p>
+            <div className="welcome-orb"><span>W</span></div>
+            <p className="welcome-eyebrow">WEBXWHALE CHAT</p>
+            <h2>Private conversations.<br />Built for connection.</h2>
+            <p>Select a conversation from the left to get started.</p>
+            <div className="welcome-badges">
+              <span>🔐 End-to-end encrypted</span>
+              <span>⚡ Real-time</span>
+              <span>🎙 Calls ready</span>
+            </div>
           </div>
         )}
       </div>
