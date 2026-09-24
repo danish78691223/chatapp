@@ -10,7 +10,8 @@ export const sendMessage = async (req, res) => {
     const message = await Message.create({
       sender,
       receiver,
-      text: text || "",\n      encryptedPayload: encryptedPayload || undefined,
+      text: encryptedPayload ? "" : (text || ""),
+      encryptedPayload: encryptedPayload || undefined,
       file: file || null,
       fileType: fileType || null,
     });
@@ -108,13 +109,20 @@ export const sendGroupMessage = async (req, res) => {
     const message = await Message.create({
       sender,
       groupId,
-      text: text || "",
+      text: encryptedPayloads?.length ? "" : (text || ""),
+      encryptedPayloads: encryptedPayloads || [],
       file: file || null,
       fileType: fileType || null,
     });
 
-    // update lastMessage for UI convenience
-    group.lastMessage = text ? text : (file ? "[Media]" : "");
+    group.lastMessage = file ? "📎 Encrypted media" : "🔐 Encrypted message";
+    for (const memberId of group.members) {
+      const key = memberId.toString();
+      if (key !== String(sender)) {
+        const current = Number(group.unreadCounts?.get(key) || 0);
+        group.unreadCounts.set(key, current + 1);
+      }
+    }
     await group.save();
 
     res.status(201).json(message);
