@@ -6,8 +6,8 @@ import User from "../models/User.js";
 export const getAllGroups = async (req, res) => {
   try {
     const groups = await Group.find()
-      .populate("creator", "name email phone")
-      .populate("members", "name email phone");
+      .populate("creator", "name email phone publicKey e2eeVersion")
+      .populate("members", "name email phone publicKey e2eeVersion");
     res.status(200).json(groups);
   } catch (err) {
     console.error("❌ [Group Error] Fetching all:", err.message);
@@ -36,8 +36,8 @@ export const createGroup = async (req, res) => {
     await newGroup.save();
 
     const populated = await Group.findById(newGroup._id)
-      .populate("creator", "name email phone")
-      .populate("members", "name email phone");
+      .populate("creator", "name email phone publicKey e2eeVersion")
+      .populate("members", "name email phone publicKey e2eeVersion");
 
     res.status(201).json({ message: "Group created successfully", group: populated });
   } catch (err) {
@@ -63,7 +63,7 @@ export const joinGroup = async (req, res) => {
 
     group.members.push(userId);
     await group.save();
-    await group.populate("members", "name email phone");
+    await group.populate("members", "name email phone publicKey e2eeVersion");
 
     res.status(200).json({ message: "Joined group", group });
   } catch (err) {
@@ -92,7 +92,7 @@ export const addMember = async (req, res) => {
 
     group.members.push(userId);
     await group.save();
-    await group.populate("members", "name email phone");
+    await group.populate("members", "name email phone publicKey e2eeVersion");
 
     res.status(200).json({ message: "Member added successfully", group });
   } catch (err) {
@@ -106,8 +106,8 @@ export const getUserGroups = async (req, res) => {
   try {
     const { userId } = req.params;
     const groups = await Group.find({ members: userId })
-      .populate("creator", "name email phone")
-      .populate("members", "name email phone");
+      .populate("creator", "name email phone publicKey e2eeVersion")
+      .populate("members", "name email phone publicKey e2eeVersion");
     res.status(200).json(groups);
   } catch (err) {
     console.error("❌ [Group Error] Fetching user groups:", err.message);
