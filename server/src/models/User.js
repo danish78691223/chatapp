@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     phone: { type: String },
-    publicKey: { type: Object }, // ✅ store user’s RSA public key (JWK)
+    publicKey: { type: Object }, // client E2EE identity public key (JWK)\n    e2eeVersion: { type: Number, default: 1 },
 
     // ✅ Subscription Details
     subscription: {
