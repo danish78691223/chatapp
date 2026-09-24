@@ -1,267 +1,274 @@
-/* ====== GLOBAL ====== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --wx-bg: #f5f7fb;
+  --wx-surface: rgba(255,255,255,.86);
+  --wx-border: rgba(18,31,53,.08);
+  --wx-text: #142033;
+  --wx-muted: #748096;
+  --wx-primary: #5b5cf0;
+  --wx-primary-2: #8b5cf6;
+  --wx-shadow: 0 24px 70px rgba(38,44,84,.12);
+}
+
+* { box-sizing: border-box; }
+
+.webxwhale-app {
   font-family: "Inter", sans-serif;
-}
-
-body {
-  background: #eef3f8;
-}
-
-.chatapp-shell {
-  display: flex;
   height: 100vh;
   overflow: hidden;
+  display: flex;
+  background:
+    radial-gradient(circle at 75% 10%, rgba(139,92,246,.13), transparent 28%),
+    radial-gradient(circle at 35% 90%, rgba(91,92,240,.10), transparent 30%),
+    var(--wx-bg);
+  color: var(--wx-text);
 }
 
-/* ====== SIDEBAR ====== */
-.sidebar {
-  width: 300px;
-  background: #ffffff;
-  border-right: 1px solid #e6ecf2;
+.webxwhale-app .sidebar {
+  width: 310px;
+  flex: 0 0 310px;
+  background: var(--wx-surface);
+  backdrop-filter: blur(22px);
+  border-right: 1px solid var(--wx-border);
+  box-shadow: 12px 0 45px rgba(27,34,63,.06);
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 12px rgba(0,0,0,0.06);
+  z-index: 5;
 }
 
-.sidebar-header {
-  background: linear-gradient(135deg, #4F8BFF, #7BC6FF);
-  padding: 15px 18px;
-  display: flex;
-  justify-content: space-between;
+.webxwhale-app .sidebar-header {
+  min-height: 76px;
+  padding: 16px 18px;
+  background: transparent;
+  color: var(--wx-text);
+  border-bottom: 1px solid var(--wx-border);
+}
+
+.webxwhale-app .sidebar-header h2 {
+  font-size: 1.08rem;
+  letter-spacing: -.02em;
+}
+
+.webxwhale-app .sidebar-header h2::before {
+  content: "W";
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
   align-items: center;
-  color: white;
-}
-
-.sidebar-header h2 {
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-
-.sidebar-logout {
-  background: #ff4d4d;
-  border: none;
-  color: #fff;
-  padding: 7px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: 0.2s;
-}
-
-.sidebar-logout:hover {
-  background: #d93636;
-}
-
-/* ====== GROUP LIST ====== */
-.sidebar-list {
-  flex: 1;
-  overflow-y: auto;
-  padding-top: 8px;
-}
-
-.sidebar-group-item {
-  display: flex;
-  align-items: center;
-  padding: 10px 18px;
-  margin: 4px 10px;
-  cursor: pointer;
+  justify-content: center;
+  margin-right: 9px;
   border-radius: 10px;
-  transition: 0.2s;
-}
-
-.sidebar-group-item:hover {
-  background: rgba(79,139,255,0.12);
-}
-
-.active-group {
-  background: rgba(79,139,255,0.18) !important;
-}
-
-.avatar {
-  width: 42px;
-  height: 42px;
-  background: #4F8BFF;
-  color: #fff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  margin-right: 12px;
-  box-shadow: 0 3px 8px rgba(79,139,255,0.35);
-}
-
-/* ====== GROUP NAME ====== */
-.sidebar-group-name {
-  font-size: 1.05rem;
-  font-weight: 600;
-}
-
-/* ====== CREATE BUTTON ====== */
-.sidebar-create-btn {
-  background: #4F8BFF;
   color: white;
-  margin: 15px;
-  padding: 10px 0;
-  border: none;
-  border-radius: 8px;
+  background: linear-gradient(135deg, var(--wx-primary), var(--wx-primary-2));
+  box-shadow: 0 8px 22px rgba(91,92,240,.28);
+}
+
+.webxwhale-app .sidebar-logout,
+.webxwhale-app .profile-btn,
+.webxwhale-app .theme-btn {
+  border: 0;
+  background: rgba(20,32,51,.05);
+  color: var(--wx-text);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease;
+}
+
+.webxwhale-app .sidebar-logout { padding: 7px 10px; }
+.webxwhale-app .theme-btn, .webxwhale-app .profile-btn { padding: 7px 9px; }
+.webxwhale-app .sidebar-logout:hover,
+.webxwhale-app .profile-btn:hover,
+.webxwhale-app .theme-btn:hover { transform: translateY(-2px); background: rgba(91,92,240,.10); }
+
+.webxwhale-app .sidebar-list {
+  padding: 14px 10px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.webxwhale-app .sidebar-group-item {
+  position: relative;
+  padding: 11px 12px;
+  margin: 4px 0;
+  border-radius: 15px;
+  transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.webxwhale-app .sidebar-group-item:hover {
+  transform: translateX(3px);
+  background: rgba(91,92,240,.07);
+}
+
+.webxwhale-app .active-group {
+  background: linear-gradient(100deg, rgba(91,92,240,.13), rgba(139,92,246,.06)) !important;
+  box-shadow: inset 3px 0 0 var(--wx-primary);
+}
+
+.webxwhale-app .avatar {
+  width: 45px;
+  height: 45px;
+  margin-right: 12px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--wx-primary), var(--wx-primary-2));
+  box-shadow: 0 9px 22px rgba(91,92,240,.22);
+}
+
+.webxwhale-app .sidebar-group-name {
+  font-size: .94rem;
+  color: var(--wx-text);
+}
+
+.webxwhale-app .sidebar-create-btn,
+.webxwhale-app .upgrade-btn {
+  margin: 10px 15px;
+  border: 0;
+  border-radius: 13px;
+  padding: 12px;
+  color: white;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(79,139,255,0.4);
-  transition: 0.2s;
+  background: linear-gradient(135deg, var(--wx-primary), var(--wx-primary-2));
+  box-shadow: 0 12px 25px rgba(91,92,240,.22);
+  transition: transform .2s ease, box-shadow .2s ease;
 }
 
-.sidebar-create-btn:hover {
-  background: #3b6fe0;
+.webxwhale-app .sidebar-create-btn:hover,
+.webxwhale-app .upgrade-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(91,92,240,.28);
 }
 
-/* ====== CHAT AREA ====== */
-.chat-area {
+.webxwhale-app .upgrade-plan-container { margin-top: auto; }
+
+.webxwhale-app .upgrade-btn {
+  width: calc(100% - 30px);
+  margin-bottom: 0;
+}
+
+.webxwhale-app .chat-area {
   flex: 1;
-  background: #f8fafc;
-  display: flex;
-  flex-direction: column;
+  min-width: 0;
+  background: transparent;
+  position: relative;
 }
 
-.welcome-placeholder {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+.webxwhale-app .welcome-placeholder {
   height: 100%;
-  color: #7d8da3;
-  font-size: 1.2rem;
-}
-
-/* ====== MODAL ====== */
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 25px 25px;
-  width: 350px;
-  border-radius: 12px;
-  box-shadow: 0px 10px 35px rgba(0,0,0,0.15);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px;
+  animation: wxFadeUp .55s ease both;
+}
+
+.welcome-orb {
+  width: 86px;
+  height: 86px;
+  display: grid;
+  place-items: center;
+  border-radius: 28px;
+  margin-bottom: 22px;
+  color: white;
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--wx-primary), var(--wx-primary-2));
+  box-shadow: 0 20px 55px rgba(91,92,240,.30);
+  animation: wxFloat 4s ease-in-out infinite;
+}
+
+.welcome-eyebrow {
+  margin-bottom: 10px;
+  color: var(--wx-primary);
+  font-size: .74rem;
+  font-weight: 800;
+  letter-spacing: .2em;
+}
+
+.welcome-placeholder h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.3rem);
+  line-height: 1.06;
+  letter-spacing: -.055em;
+}
+
+.welcome-placeholder > p:not(.welcome-eyebrow) {
+  margin: 16px 0 0;
+  color: var(--wx-muted);
+  font-size: .96rem;
+}
+
+.welcome-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 24px;
+}
+
+.welcome-badges span {
+  padding: 8px 12px;
+  border: 1px solid var(--wx-border);
+  border-radius: 999px;
+  background: rgba(255,255,255,.68);
+  color: var(--wx-muted);
+  font-size: .78rem;
+  box-shadow: 0 8px 22px rgba(27,34,63,.05);
+}
+
+.modal {
+  width: min(380px, calc(100vw - 30px));
+  border-radius: 22px;
+  padding: 24px;
+  background: white;
+  box-shadow: var(--wx-shadow);
 }
 
 .modal input {
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #9bb6d1;
+  border: 1px solid var(--wx-border);
+  border-radius: 12px;
+  padding: 13px;
   outline: none;
 }
 
 .modal button {
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  font-weight: 600;
+  border: 0;
+  border-radius: 12px;
+  padding: 11px;
   cursor: pointer;
+  font-weight: 700;
 }
 
 .modal button:first-of-type {
-  background: #4F8BFF;
+  background: var(--wx-primary);
   color: white;
 }
 
-.modal button:last-of-type {
-  background: #e74c3c;
-  color: white;
+.modal button:last-of-type { background: #eef0f5; color: var(--wx-text); }
+
+@keyframes wxFadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.theme-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-
-/* ============================
-   RESPONSIVE FIX FOR CHAT LAYOUT
-=============================== */
-
-@media (max-width: 992px) {
-
-  .chatapp-shell {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100% !important;
-    height: auto;
-    max-height: 300px;
-  }
-
-  .chat-area {
-    width: 100%;
-    height: calc(100vh - 300px);
-  }
+@keyframes wxFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
 }
 
 @media (max-width: 768px) {
-
-  .sidebar {
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    height: 100vh !important;
-    z-index: 999;
-    transform: translateX(-100%);
-    transition: 0.3s ease;
+  .webxwhale-app .sidebar {
+    width: min(310px, 88vw);
+    flex-basis: 0;
+    position: fixed;
+    inset: 0 auto 0 0;
+    transform: translateX(-105%);
+    transition: transform .28s cubic-bezier(.2,.8,.2,1);
   }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  .chat-area {
-    height: 100vh !important;
-    width: 100% !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .sidebar {
-    width: 220px !important;
-  }
-}
-
-
-/* ============================
-   HOME RESPONSIVE FIXES
-=============================== */
-
-@media (max-width: 992px) {
-  .chatapp-shell {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    height: auto;
-    max-height: 300px;
-  }
-
-  .chat-area {
-    height: calc(100vh - 300px);
-  }
-}
-
-@media (max-width: 768px) {
-  .chatapp-shell {
-    flex-direction: row;
-  }
-
-  .chat-area {
-    width: 100% !important;
-    height: 100vh !important;
-  }
+  .webxwhale-app .sidebar.open { transform: translateX(0); }
+  .webxwhale-app .chat-area { width: 100%; }
+  .welcome-placeholder h2 { font-size: 2.1rem; }
+  .welcome-badges { max-width: 320px; }
 }
