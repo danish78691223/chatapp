@@ -5,12 +5,12 @@ import Group from "../models/Group.js";
 /* Send private message */
 export const sendMessage = async (req, res) => {
   try {
-    const { sender, receiver, text, file, fileType } = req.body;
+    const { sender, receiver, text, file, fileType, encryptedPayload } = req.body;
 
     const message = await Message.create({
       sender,
       receiver,
-      text: text || "",
+      text: text || "",\n      encryptedPayload: encryptedPayload || undefined,
       file: file || null,
       fileType: fileType || null,
     });
@@ -61,7 +61,7 @@ export const getGroupMessages = async (req, res) => {
 export const sendGroupMessage = async (req, res) => {
   try {
     const { groupId } = req.params;
-    const { sender, text, file, fileType } = req.body;
+    const { sender, text, file, fileType, encryptedPayloads } = req.body;
 
     const group = await Group.findById(groupId);
     if (!group) return res.status(404).json({ message: "Group not found" });
