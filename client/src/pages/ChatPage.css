@@ -1,484 +1,286 @@
-/* ===== Chat Page Container ===== */
 .chat-page {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background: #eef3f8;
+  min-width: 0;
+  background: rgba(255,255,255,.42);
+  backdrop-filter: blur(18px);
+  animation: wxChatIn .3s ease both;
 }
 
-/* ===== Top Group Bar ===== */
 .chat-top-bar {
+  min-height: 74px;
+  padding: 12px 18px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 10px 18px;
-  background: #ffffff;
-  border-bottom: 1px solid #e6e6e6;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  gap: 10px;
+  background: rgba(255,255,255,.82);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(20,32,51,.08);
+  box-shadow: 0 8px 30px rgba(20,32,51,.05);
+  z-index: 3;
 }
 
-.chat-top-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.chat-top-info { display: flex; align-items: center; min-width: 0; flex: 1; }
 
 .group-avatar {
-  width: 42px;
-  height: 42px;
-  background: #1877f2;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  border-radius: 50%;
-  font-size: 18px;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  display: grid;
+  place-items: center;
+  margin-right: 12px;
+  border-radius: 15px;
+  color: white;
+  font-weight: 800;
+  background: linear-gradient(135deg,#5b5cf0,#8b5cf6);
+  box-shadow: 0 10px 25px rgba(91,92,240,.24);
 }
 
 .group-title {
   margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-  color: #222;
+  font-size: .98rem;
+  letter-spacing: -.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .group-members {
-  font-size: 12px;
-  color: #666;
+  max-width: 45vw;
+  margin: 4px 0 0;
+  color: #8290a6;
+  font-size: .72rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.chat-top-actions {
-  font-size: 22px;
+.call-btn, .members-btn {
+  border: 0;
+  border-radius: 11px;
+  padding: 9px 12px;
+  color: #4b51d9;
+  background: #eef0ff;
   cursor: pointer;
-  color: #444;
+  font-weight: 700;
+  transition: transform .18s ease, background .18s ease;
 }
 
-/* ===== Messages Area ===== */
+.call-btn:hover, .members-btn:hover { transform: translateY(-2px); background: #e2e5ff; }
+
 .messages {
   flex: 1;
-  padding: 15px;
+  min-height: 0;
   overflow-y: auto;
-  scroll-behavior: smooth;
+  padding: 26px clamp(14px, 4vw, 55px);
   display: flex;
   flex-direction: column;
+  gap: 9px;
+  background:
+    radial-gradient(circle at 10% 15%, rgba(91,92,240,.045), transparent 25%),
+    radial-gradient(circle at 90% 80%, rgba(139,92,246,.045), transparent 25%);
 }
 
-/* Status text */
-.loading, 
-.no-msg {
-  text-align: center;
-  color: #999;
-  margin-top: 20px;
-  font-size: 15px;
+.my-message, .their-message {
+  max-width: min(68%, 620px);
+  padding: 10px 13px;
+  border-radius: 17px;
+  word-break: break-word;
+  box-shadow: 0 7px 22px rgba(20,32,51,.055);
+  animation: wxMessageIn .22s ease both;
 }
 
-/* ===== Message Bubbles (WhatsApp Style) ===== */
-/* ✅ Chat bubbles clean design */
-.my-message,
-.their-message {
-  max-width: 60%;
-  padding: 10px 14px;
-  margin: 6px 0;
-  border-radius: 18px;
-  font-size: 15px;
-  display: inline-block;
-  line-height: 1.4;
-}
-
-/* ✅ Your messages (Right) */
 .my-message {
-  background: #007a5a;
-  color: #fff;
-  margin-left: auto;
-  border-bottom-right-radius: 4px;
+  align-self: flex-end;
+  color: white;
+  background: linear-gradient(135deg,#5b5cf0,#705cf5);
+  border-bottom-right-radius: 5px;
 }
 
-/* ✅ Other's messages (Left) */
 .their-message {
-  background: #ffffff;
-  color: #111;
-  border: 1px solid #dcdcdc;
-  border-bottom-left-radius: 4px;
-  margin-right: auto;
+  align-self: flex-start;
+  color: #1c2940;
+  background: rgba(255,255,255,.92);
+  border-bottom-left-radius: 5px;
 }
 
+.chat-media {
+  display: block;
+  max-width: min(360px, 70vw);
+  max-height: 340px;
+  border-radius: 12px;
+  object-fit: cover;
+  cursor: pointer;
+}
 
-
-/* ===== Input / Send Section ===== */
 .send-box {
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 10px;
-  background: #ffffff;
-  border-top: 1px solid #e3e3e3;
-  position: relative;
+  gap: 8px;
+  padding: 12px clamp(12px, 3vw, 28px) 16px;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(20,32,51,.07);
 }
 
-.send-box input {
+.send-box > input {
+  min-width: 0;
   flex: 1;
-  padding: 12px;
-  border-radius: 25px;
-  border: 1px solid #d8d8d8;
+  height: 46px;
+  border: 1px solid rgba(20,32,51,.08);
   outline: none;
-  font-size: 15px;
-  padding-left: 45px;
+  border-radius: 15px;
+  padding: 0 15px;
+  color: #142033;
+  background: #f5f7fb;
+  transition: border .2s ease, box-shadow .2s ease, background .2s ease;
 }
 
-.send-box button {
-  margin-left: 8px;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 25px;
-  background: #1877f2;
-  color: #fff;
+.send-box > input:focus {
+  border-color: rgba(91,92,240,.45);
+  box-shadow: 0 0 0 4px rgba(91,92,240,.08);
+  background: white;
+}
+
+.send-box button, .upload-btn {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  border: 0;
+  border-radius: 13px;
   cursor: pointer;
-  font-weight: 600;
-  transition: 0.2s;
+  background: #eef0f5;
+  color: #59657b;
+  transition: transform .18s ease, background .18s ease;
 }
 
-.send-box button:hover {
-  background: #f8f8f8;
+.send-box button:last-child {
+  width: auto;
+  padding: 0 17px;
+  color: white;
+  font-weight: 700;
+  background: linear-gradient(135deg,#5b5cf0,#8b5cf6);
+  box-shadow: 0 8px 20px rgba(91,92,240,.2);
 }
 
-/* ===== Emoji Button ===== */
-.emoji-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  margin-right: 8px;
-}
+.send-box button:hover, .upload-btn:hover { transform: translateY(-2px); }
 
-.emoji-btn:hover {
-  opacity: 0.7;
-}
-
-
-/* ================================
-   WHATSAPP STYLE EMOJI PICKER
-================================= */
-
-/* Load Google’s Noto Color Emoji (fix blue Windows emojis) */
-@font-face {
-  font-family: "Noto Color Emoji";
-  src: url("https://fonts.gstatic.com/s/notocoloremoji/v18/Yq6R-LCAWCX3-6bM4fJRYH8wO7q7.woff2")
-    format("woff2");
-}
-
-.EmojiPickerReact,
-.EmojiPickerReact * {
-  font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji",
-    sans-serif !important;
-}
-
-/* Popup positioning */
 .emoji-popup {
   position: absolute;
-  bottom: 75px;
+  bottom: 76px;
   left: 12px;
-  z-index: 9999;
-}
-
-/* Main container (WhatsApp bubble style) */
-.EmojiPickerReact {
-  width: 340px !important;
-  border-radius: 16px !important;
-  padding: 6px !important;
-  background: #ffffff !important;
-
-  border: none !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
-  overflow: hidden !important;
-}
-
-/* Search Bar */
-.EmojiPickerReact .epr-search-container {
-  background: #f0f2f5 !important;
-  border-radius: 10px !important;
-  border: 1px solid #e5e7eb !important;
-  padding: 6px !important;
-}
-
-.EmojiPickerReact .epr-search {
-  background: transparent !important;
-  border: none !important;
-  outline: none !important;
-  font-size: 14px !important;
-}
-
-/* Category Navigation (top icons) */
-.EmojiPickerReact .epr-category-nav {
-  border-bottom: 1px solid #ececec !important;
-  padding-bottom: 4px !important;
-  margin-bottom: 6px !important;
-}
-
-.EmojiPickerReact .epr-category-nav button {
-  background: transparent !important;
-  opacity: 0.35 !important;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.EmojiPickerReact .epr-category-nav button:hover,
-.EmojiPickerReact .epr-category-nav button.active {
-  opacity: 1 !important;
-}
-
-/* Emoji grid */
-.EmojiPickerReact .epr-emoji {
-  border-radius: 8px !important;
-  padding: 6px !important;
-  transition: background 0.15s ease-in-out;
-}
-
-.EmojiPickerReact .epr-emoji:hover {
-  background: #eef1f3 !important;
-}
-
-/* Scrollbar look */
-.EmojiPickerReact ::-webkit-scrollbar {
-  width: 6px;
-}
-
-.EmojiPickerReact ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.18);
-  border-radius: 20px;
-}
-
-.EmojiPickerReact ::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-
-
-/* 📎 Upload Button Styling */
-.upload-btn {
-  font-size: 20px;
-  margin-right: 8px;
-  cursor: pointer;
-  background: none;
-  border: none;
-  outline: none;
-}
-
-.upload-btn:hover {
-  opacity: 0.7;
-}
-
-/* Uploaded media */
-.chat-media {
-  max-width: 240px;
-  max-height: 240px;
-  border-radius: 10px;
-  margin-top: 4px;
-}
-
-/* Fix input & emoji alignment */
-.send-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.send-box input {
-  flex: 1;
-}
-
-/* =======================
-   SENDING ANIMATION
-==========================*/
-.sending-bubble {
-  background: #ccc;
-  opacity: 0.7;
-  position: relative;
-}
-
-.sending-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.upload-preview {
-  width: 160px;
-  height: 160px;
-  object-fit: cover;
-  border-radius: 10px;
-  opacity: 0.8;
-}
-
-/* Loader */
-.progress {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #333;
-}
-
-.loader {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #1877f2;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  100% { transform: rotate(360deg); }
-}
-
-
-/* ===== GROUP CALL BANNER ===== */
-.group-call-banner {
-  background: #1e293b;
-  color: #fff;
-  padding: 12px 16px;
-  margin: 10px;
-  border-radius: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  animation: fadeSlide 0.25s ease;
-}
-
-.group-call-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.join-call-btn {
-  background: #22c55e;
-  padding: 8px 16px;
-  border: none;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.dismiss-call-btn {
-  background: #475569;
-  padding: 8px 14px;
-  border: none;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-/* 📞 Call button in top bar */
-.call-btn {
-  background: #2563eb;
-  color: white;
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.call-btn:hover {
-  background: #1d4ed8;
-}
-
-/* Small slide-in animation */
-@keyframes fadeSlide {
-  0% { opacity: 0; transform: translateY(-10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-
-.members-btn {
-  margin-left: 8px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
+  z-index: 20;
+  animation: wxFadeUp .18s ease both;
 }
 
 .members-popup {
   position: absolute;
-  right: 16px;
-  top: 64px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.12);
-  padding: 12px 16px;
-  width: 260px;
-  z-index: 20;
+  top: 82px;
+  right: 18px;
+  z-index: 10;
+  width: min(350px, calc(100vw - 30px));
+  padding: 16px;
+  border: 1px solid rgba(20,32,51,.08);
+  border-radius: 18px;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 22px 60px rgba(20,32,51,.16);
+  animation: wxFadeUp .2s ease both;
 }
 
 .members-popup-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-.group-call-btn {
-  background: #1da1f2;
-  border: none;
-  color: #fff;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
+.members-popup-header h4 { margin: 0; }
+
+.member-row {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 4px;
+  border-bottom: 1px solid rgba(20,32,51,.06);
+}
+
+.member-call-btn, .group-call-btn {
+  border: 0;
+  border-radius: 9px;
+  padding: 7px 10px;
+  color: #4b51d9;
+  background: #eef0ff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.group-call-banner, .incoming-direct-call {
+  position: absolute;
+  top: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: min(620px, calc(100% - 28px));
+  padding: 10px 12px;
+  border: 1px solid rgba(91,92,240,.14);
+  border-radius: 14px;
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 15px 45px rgba(20,32,51,.14);
+  animation: wxFadeUp .25s ease both;
+}
+
+.join-call-btn, .accept-btn {
+  border: 0;
+  border-radius: 9px;
+  padding: 7px 11px;
+  color: white;
+  background: #5b5cf0;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.dismiss-call-btn, .reject-btn {
+  border: 0;
+  border-radius: 9px;
+  padding: 7px 11px;
+  background: #eef0f5;
   cursor: pointer;
 }
 
-.group-call-btn:hover {
-  opacity: 0.9;
+@keyframes wxMessageIn {
+  from { opacity: 0; transform: translateY(7px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ============================
-   CHAT PAGE RESPONSIVE FIXES
-=============================== */
+@keyframes wxChatIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
-@media (max-width: 768px) {
+@keyframes wxFadeUp {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
 
-  .chat-top-bar {
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 8px;
-  }
-
-  .messages {
-    padding: 10px;
-  }
-
-  .my-message,
-  .their-message {
-    max-width: 85%;
-    font-size: 14px;
-  }
-
-  .chat-media {
-    max-width: 90%;
-    height: auto;
-  }
-
-  .send-box {
-    padding: 8px;
-    gap: 6px;
-  }
-
-  .send-box input {
-    font-size: 14px;
-    padding: 10px;
-  }
-
-  .send-box button {
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-
-  .emoji-popup {
-    left: 10px;
-    right: 10px;
-    bottom: 70px;
-    width: calc(100% - 20px) !important;
-  }
+@media (max-width: 680px) {
+  .chat-top-bar { min-height: 64px; padding: 9px 12px; }
+  .members-btn { display: none; }
+  .call-btn { padding: 8px 10px; }
+  .group-members { max-width: 44vw; }
+  .messages { padding: 18px 12px; }
+  .my-message, .their-message { max-width: 84%; }
+  .chat-media { max-width: 75vw; }
+  .send-box { padding: 9px 9px 12px; gap: 5px; }
+  .send-box button, .upload-btn { width: 40px; height: 40px; flex-basis: 40px; }
+  .send-box button:last-child { width: 44px; padding: 0; font-size: 0; }
+  .send-box button:last-child::after { content: "➤"; font-size: 16px; }
 }
