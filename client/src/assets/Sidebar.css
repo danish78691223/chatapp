@@ -136,3 +136,5 @@
 .upgrade-plan-container { margin-top:auto; padding:8px 2px; }
 .sidebar-create-btn { width:100%; border:1px solid rgba(255,255,255,.1); background:linear-gradient(135deg,rgba(109,93,252,.95),rgba(37,208,255,.75)); color:#fff; border-radius:13px; padding:11px; font-weight:800; cursor:pointer; }
 @media (max-width:768px) { .sidebar { width:300px; padding:18px 12px; } .mobile-menu-btn { background:#11172a; color:#fff; border:1px solid rgba(255,255,255,.1); } .sidebar-close-btn { background:#262c43; } }
+
+.sidebar-group-title{display:flex;align-items:center;gap:7px;min-width:0}.unread-badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;display:inline-grid;place-items:center;background:#6d5dfc;color:#fff;font-size:10px;font-weight:800;box-shadow:0 4px 12px rgba(109,93,252,.35)}
