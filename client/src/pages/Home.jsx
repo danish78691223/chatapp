@@ -69,6 +69,7 @@ const Home = ({ user, setUser }) => {
       {/* Sidebar */}
       <Sidebar
         groups={groups}
+        currentUserId={currentUserId}
         selectedGroup={selectedGroup}
         setSelectedGroup={(g) => {
           setSelectedGroup(g);
