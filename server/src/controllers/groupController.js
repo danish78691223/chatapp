@@ -13,7 +13,25 @@ const populateGroup = (query) =>
 export const getAllGroups = async (req, res) => {
   try {
     const groups = await populateGroup(Group.find());
-    res.status(200).json(groups);
+    const currentUserId = String(req.userId);
+
+    const sanitized = groups.map((group) => {
+      const isAdmin =
+        group.admins?.some((admin) => String(admin._id) === currentUserId) ||
+        String(group.creator?._id) === currentUserId;
+
+      const pending = (group.joinRequests || []).filter((r) => r.status === "pending");
+      const mine = (group.joinRequests || []).find((r) => String(r.user?._id || r.user) === currentUserId);
+
+      const data = group.toObject();
+      delete data.joinRequests;
+      data.joinRequestStatus = mine?.status || null;
+      data.pendingRequestCount = isAdmin ? pending.length : 0;
+      data.isAdmin = Boolean(isAdmin);
+      return data;
+    });
+
+    res.status(200).json(sanitized);
   } catch (err) {
     console.error("❌ [Group Error] Fetching all:", err.message);
     res.status(500).json({ message: "Server error while fetching groups" });
