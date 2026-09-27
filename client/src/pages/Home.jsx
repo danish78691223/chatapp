@@ -14,6 +14,8 @@ const Home = ({ user, setUser }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [joinRequests, setJoinRequests] = useState([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
   const currentUserId = user?.user?._id || user?._id;
   const currentName = user?.user?.name || user?.name || "there";
 
@@ -69,6 +71,41 @@ const Home = ({ user, setUser }) => {
 
   const isMember = selectedGroup?.members?.some((m) => String(m?._id || m) === String(currentUserId));
   const isCreator = String(selectedGroup?.creator?._id || selectedGroup?.creator) === String(currentUserId);
+  const isAdmin = Boolean(selectedGroup?.isAdmin || isCreator);
+
+  const refreshGroups = async (keepSelected = true) => {
+    const res = await API.get("/groups");
+    setGroups(res.data);
+    if (keepSelected && selectedGroup?._id) {
+      const updated = res.data.find((g) => String(g._id) === String(selectedGroup._id));
+      if (updated) setSelectedGroup(updated);
+    }
+    return res.data;
+  };
+
+  const loadJoinRequests = async (groupId = selectedGroup?._id) => {
+    if (!groupId || !isAdmin) return;
+    setLoadingRequests(true);
+    try {
+      const res = await API.get("/groups/" + groupId + "/join-requests");
+      setJoinRequests(res.data || []);
+    } catch (e) {
+      console.error("Join request fetch error:", e);
+      setJoinRequests([]);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedGroup?._id || !isAdmin) {
+      setJoinRequests([]);
+      return;
+    }
+    loadJoinRequests(selectedGroup._id);
+    const timer = window.setInterval(() => loadJoinRequests(selectedGroup._id), 5000);
+    return () => window.clearInterval(timer);
+  }, [selectedGroup?._id, isAdmin]);
 
   return (
     <div className="webchat-app">
@@ -78,14 +115,71 @@ const Home = ({ user, setUser }) => {
           <button className="notification-optin" onClick={async () => setNotificationsEnabled((await Notification.requestPermission()) === "granted")}>Enable notifications</button>
         )}
         {selectedGroup ? (
-          (isMember || isCreator) ? <ChatPage selectedGroup={selectedGroup} /> : (
+          (isMember || isCreator) ? (
+            <div className="chat-with-requests">
+              <ChatPage selectedGroup={selectedGroup} />
+              {isAdmin && (
+                <aside className="join-requests-panel">
+                  <div className="join-requests-header">
+                    <div><span className="eyebrow">GROUP ADMIN</span><h3>Join Requests</h3></div>
+                    <span className="request-count">{joinRequests.length}</span>
+                  </div>
+                  {loadingRequests ? <p className="request-muted">Loading requests...</p> :
+                    joinRequests.length === 0 ? <p className="request-muted">No pending requests.</p> :
+                    <div className="request-list">
+                      {joinRequests.map((request) => (
+                        <div className="join-request-item" key={request._id}>
+                          <div className="request-avatar">{(request.user?.name || "?").charAt(0).toUpperCase()}</div>
+                          <div className="request-user">
+                            <strong>{request.user?.name || "Unknown user"}</strong>
+                            <small>{request.user?.email || request.user?.phone || "Wants to join this group"}</small>
+                          </div>
+                          <div className="request-actions">
+                            <button className="approve-request" onClick={async () => {
+                              try {
+                                await API.post("/groups/" + selectedGroup._id + "/join-requests/" + request._id + "/respond", { action: "approve" });
+                                await refreshGroups();
+                                await loadJoinRequests(selectedGroup._id);
+                              } catch (e) { alert(e.response?.data?.message || "Could not approve request"); }
+                            }}>Approve</button>
+                            <button className="reject-request" onClick={async () => {
+                              try {
+                                await API.post("/groups/" + selectedGroup._id + "/join-requests/" + request._id + "/respond", { action: "reject" });
+                                await loadJoinRequests(selectedGroup._id);
+                              } catch (e) { alert(e.response?.data?.message || "Could not reject request"); }
+                            }}>Reject</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>}
+                </aside>
+              )}
+            </div>
+          ) : (
             <section className="join-screen"><div className="join-card">
               <span className="eyebrow">PRIVATE SPACE</span><h2>Join {selectedGroup.name}</h2>
-              <p>You have been invited to this conversation.</p>
-              <button onClick={async () => {
-                try { await API.post("/groups/" + selectedGroup._id + "/join"); const r = await API.get("/groups"); setGroups(r.data); setSelectedGroup(r.data.find((g) => g._id === selectedGroup._id) || selectedGroup); }
-                catch (e) { alert(e.response?.data?.message || "Join failed"); }
-              }}>Join conversation</button>
+              {selectedGroup.joinRequestStatus === "pending" ? (
+                <>
+                  <p>Your join request has been sent. A group admin must approve it before you can enter the conversation.</p>
+                  <button className="join-pending-btn" disabled>Request Pending</button>
+                </>
+              ) : selectedGroup.joinRequestStatus === "rejected" ? (
+                <>
+                  <p>Your previous request was rejected. You can send a new request to the group admin.</p>
+                  <button onClick={async () => {
+                    try { await API.post("/groups/" + selectedGroup._id + "/join"); await refreshGroups(); }
+                    catch (e) { alert(e.response?.data?.message || "Join request failed"); }
+                  }}>Request to Join Again</button>
+                </>
+              ) : (
+                <>
+                  <p>Send a request to the group admin. You will be added only after approval.</p>
+                  <button onClick={async () => {
+                    try { await API.post("/groups/" + selectedGroup._id + "/join"); await refreshGroups(); }
+                    catch (e) { alert(e.response?.data?.message || "Join request failed"); }
+                  }}>Request to Join</button>
+                </>
+              )}
             </div></section>
           )
         ) : (
