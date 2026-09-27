@@ -52,7 +52,7 @@ const Sidebar = ({ groups = [], selectedGroup, setSelectedGroup, onLogout, onSho
               const unread = Number(g.unreadCounts?.[String(currentUserId)] || 0);
               return <button key={g._id} onClick={() => { setSelectedGroup(g); setIsOpen(false); }} className={"sidebar-group-item " + (selectedGroup?._id === g._id ? "active-group" : "")}>
                 <div className="avatar">{g.name?.[0]?.toUpperCase() || "W"}</div>
-                <div className="sidebar-group-copy"><div className="sidebar-group-title"><span className="sidebar-group-name">{g.name}</span>{unread > 0 && <span className="unread-badge">{unread}</span>}</div><small>{g.lastMessage || "Encrypted conversation"}</small></div>
+                <div className="sidebar-group-copy"><div className="sidebar-group-title"><span className="sidebar-group-name">{g.name}</span>{unread > 0 && <span className="unread-badge">{unread}</span>}{g.isAdmin && g.pendingRequestCount > 0 && <span className="unread-badge" title="Pending join requests">{g.pendingRequestCount}!</span>}</div><small>{g.lastMessage || "Encrypted conversation"}</small></div>
                 <span className="sidebar-chevron">›</span>
               </button>;
             })}
