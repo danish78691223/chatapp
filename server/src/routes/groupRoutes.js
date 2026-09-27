@@ -7,23 +7,18 @@ import {
   addMember,
   getUserGroups,
   getAllGroups,
+  getJoinRequests,
+  respondToJoinRequest,
 } from "../controllers/groupController.js";
 
 const router = express.Router();
 
-// 🧾 GET ALL GROUPS
 router.get("/", protect, getAllGroups);
-
-// 🆕 CREATE NEW GROUP
 router.post("/", protect, createGroup);
-
-// 🚪 USER JOINS GROUP
 router.post("/:groupId/join", protect, joinGroup);
-
-// ➕ ADD MEMBER (Admin Action)
+router.get("/:groupId/join-requests", protect, getJoinRequests);
+router.post("/:groupId/join-requests/:requestId/respond", protect, respondToJoinRequest);
 router.post("/:groupId/addMember", protect, addMember);
-
-// 👥 GET USER'S GROUPS
 router.get("/user/:userId", getUserGroups);
 
 export default router;
